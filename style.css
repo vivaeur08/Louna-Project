@@ -1,8 +1,7 @@
-
-
+/* --- BASE PC --- */
 body {
   margin: 0;
-  height: 100vh;
+  min-height: 100vh;
   background: radial-gradient(circle, #1a3a16 0%, #0d1f0b 100%);
   font-family: 'Playfair Display', serif;
   color: #fff;
@@ -10,20 +9,26 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
 
-
-/* Titre doré */
+/* Titre */
 .title {
-  font-size: 3.5rem;
-  color: #d4af37; /* Or */
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: #d4af37;
   text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
   margin-bottom: 20px;
+  text-align: center;
 }
 
-/* Compteur style "Glassmorphism" */
+/* Compteur */
 #countdown {
   display: flex;
   gap: 15px;
@@ -33,414 +38,133 @@ body {
 .time-box {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(212, 175, 55, 0.4);
-  padding: 15px;
+  padding: 10px;
   border-radius: 10px;
   min-width: 70px;
+  text-align: center;
 }
 
 .time-box span { font-size: 2rem; color: #d4af37; font-weight: bold; }
+.time-box p { margin: 5px 0 0; font-size: 0.8rem; }
 
-/* LE CADEAU */
-.gift-section { position: relative; perspective: 1000px; }
-
-.gift {
-  width: 150px;
-  height: 150px;
-  background: #a31d1d;
-  position: absolute;
-  cursor: pointer;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-  transition: transform 0.3s;
-}
-
-.gift:active { transform: scale(0.95); }
-
-.gift-lid {
-  position: absolute;
-  width: 160px;
-  height: 30px;
-  background: #c0392b;
-  top: -20px;
-  left: -5px;
-  z-index: 10;
-  box-shadow: 0 5px 10px rgba(0,0,0,0.3);
-}
-
-.ribbon-v, .ribbon-h {
-  position: absolute;
-  background: #d4af37;
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-}
-
-.ribbon-v { width: 30px; height: 100%; left: 60px; }
-.ribbon-h { width: 100%; height: 30px; top: 60px; }
-
-.bow {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  background: #d4af37;
-  top: -50px;
-  left: 45px;
-  border-radius: 50% 50% 0 0;
-  z-index: 11;
-}
-
-/* Message d'erreur */
-.error-message {
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: white;
-  color: #a31d1d;
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-weight: bold;
-  opacity: 0;
-  transition: opacity 0.3s;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.error-message.show { opacity: 1; }
-
-.hidden { display: none; }
-
-.btn-open {
-  display: block;
-  margin-top: 30px;
-  padding: 15px 30px;
-  background: #d4af37;
-  color: #1a3a16;
-  text-decoration: none;
-  border-radius: 50px;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: #1a3a16;
-  color: white;
-  font-family: 'Georgia', serif;
-  display: flex;
-  justify-content: center;
-  text-align: center;
-}
-
-.content { padding: 40px 20px; max-width: 900px; }
-
-h1 { color: #d4af37; margin-bottom: 10px; }
-
-/* Compteur de jours */
-#countdown-june {
-  margin: 20px 0 50px;
-  display: flex;
-  justify-content: center;
-}
-
-#countdown-june .time-box {
-  background: rgba(212, 175, 55, 0.2);
-  border: 2px solid #d4af37;
-  padding: 20px;
-  border-radius: 50%;
-  width: 120px;
-  height: 120px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-#days { font-size: 2.5rem; font-weight: bold; color: #d4af37; }
-
-/* Animation de la carte de jour */
-.calendar-container {
-  perspective: 1000px;
-  margin-top: 30px;
-}
-
-.daily-card {
-  width: 300px;
-  height: 200px;
-  margin: 0 auto;
-  cursor: pointer;
-}
-
-.card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  transition: transform 0.8s;
-  transform-style: preserve-3d;
-}
-
-.daily-card.flipped .card-inner {
-  transform: rotateY(180deg);
-}
-
-.card-front, .card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border-radius: 15px;
-  border: 2px dashed #d4af37;
-  padding: 20px;
-}
-
-.card-front { background: #a31d1d; }
-.card-back {
-  background: white;
-  color: #333;
-  transform: rotateY(180deg);
-  font-style: italic;
-  font-size: 1.2rem;
-}
-
-.back-link {
-  display: inline-block;
-  margin-top: 50px;
-  color: #d4af37;
-  text-decoration: none;
-}
-
-.nav-surprise {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  background: rgba(212, 175, 55, 0.1); /* Or très léger */
-  border: 1px solid #d4af37;
-  color: #d4af37;
-  text-decoration: none;
-  border-radius: 30px;
-  font-size: 0.9rem;
-  font-family: 'Playfair Display', serif;
-  transition: all 0.3s ease;
-  z-index: 1000; /* Pour qu'il soit toujours au-dessus */
-}
-
-.nav-surprise:hover {
-  background: #d4af37;
-  color: #1a3a16;
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
-  transform: translateY(-2px);
-}
-
-
-/* Empêche la sélection de texte et le menu contextuel sur les émojis */
-* {
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  touch-action: none; /* Désactive le scroll pendant qu'on joue */
-}
-
-/* Ajustement de la taille des émojis pour les petits écrans */
-@media (max-width: 380px) {
-  .grid div {
-      font-size: 1.2rem;
-  }
-  .stat span {
-      font-size: 1rem;
-  }
-}
-
-/* Pour que le bouton Quitter ne soit pas trop collé au bord */
-.game-footer {
-  padding: 0 5px;
-}
-
-.game-launcher-container {
-  /* "fixed" permet de rester en haut même si on fait défiler la page */
-  position: fixed !important; 
-  top: 20px !important;
-  left: 20px !important;
-  
-  /* On force l'annulation de l'alignement du body */
-  margin: 0 !important;
-  transform: none !important;
-  
-  /* Toujours au premier plan */
-  z-index: 9999 !important;
-
-  /* Style du bouton */
-  display: flex !important;
-  align-items: center;
-  background: rgba(26, 58, 22, 0.9);
-  border: 1.5px solid #d4af37;
-  padding: 8px 15px;
-  border-radius: 30px;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  width: fit-content; /* Important pour ne pas qu'il prenne toute la largeur */
-}
-
-.game-icon {
-  margin-right: 8px;
-}
-
-.game-text {
-  color: #d4af37;
-  font-weight: bold;
-  font-size: 0.85rem;
-  white-space: nowrap; /* Empêche le texte de revenir à la ligne */
-}
-
-/* Effet au survol */
-.game-launcher-container:hover {
-  background: #d4af37;
-  border-color: #1a3a16;
-}
-
-.game-launcher-container:hover .game-text {
-  color: #1a3a16;
-}
-
-
-
-/* 1. On fixe uniquement le PARENT */
+/* MENU LATÉRAL (PC) */
 .side-menu-container {
-  position: fixed !important;
-  top: 20px !important;
-  left: 20px !important;
-  z-index: 99999 !important;
-  
-  display: flex !important;
-  flex-direction: column !important; /* Force l'empilement vertical */
-  align-items: flex-start !important; /* Aligne à gauche */
-  gap: 15px !important; /* Espace bien les boutons */
-  
-  /* Annule tout centrage hérité du body */
-  margin: 0 !important;
-  transform: none !important;
+  position: fixed;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 9999;
 }
 
-/* 2. On stylise les BOUTONS (sans position fixed ici !) */
 .game-launcher-container {
-  position: relative !important; /* On retire le fixed ici */
-  display: flex !important;
+  display: flex;
   align-items: center;
   background: rgba(26, 58, 22, 0.95);
   border: 1.5px solid #d4af37;
   padding: 10px 18px;
   border-radius: 30px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   transition: all 0.3s ease;
-  width: fit-content; /* S'adapte au texte */
 }
 
-/* 3. Effets au survol */
-.game-launcher-container:hover {
-  transform: scale(1.05);
-  background: #d4af37;
+.game-text { color: #d4af37; font-weight: bold; font-size: 0.9rem; margin-left: 10px; white-space: nowrap; }
+
+/* Couleurs Jeux */
+.catch-btn { border-color: #ff4d6d; }
+.puzzle-btn { border-color: #4da3ff; }
+.flappy-btn { border-color: #63f43f; }
+
+/* CADEAU */
+.gift-section { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    position: relative; 
+    margin-top: 100px; /* Espace pour le cadeau */
 }
 
-.game-launcher-container:hover .game-text {
-  color: #1a3a16;
-}
-
-.game-icon {
-  font-size: 1.2rem;
-  margin-right: 10px;
-}
-
-.game-text {
-  color: #d4af37;
-  font-weight: bold;
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-
-
-/* Conteneur principal qui empile tout à gauche */
-.side-menu-container {
-  position: fixed !important;
-  top: 20px !important;
-  left: 20px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 12px !important; /* Espace entre chaque bouton */
-  z-index: 99999;
-}
-
-/* Style de base pour tous les boutons de jeux */
-.game-launcher-container {
-  display: flex;
-  align-items: center;
-  background: rgba(26, 58, 22, 0.95); /* Vert forêt */
-  border: 1.5px solid #d4af37; /* Or */
-  padding: 10px 18px;
-  border-radius: 30px;
+.gift {
+  width: 150px; height: 150px;
+  background: #a31d1d;
+  position: relative;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  width: fit-content;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Couleurs spécifiques pour les bordures */
-.catch-btn { border-color: #ff4d6d; } /* Rose/Rouge pour le catch */
-.puzzle-btn { border-color: #4da3ff; } /* Bleu clair pour le puzzle */
-
-.game-icon {
-  font-size: 1.2rem;
-  margin-right: 12px;
+.gift-lid {
+  position: absolute; width: 160px; height: 30px;
+  background: #c0392b; top: -20px; left: -5px; z-index: 10;
 }
 
-.game-text {
-  color: #d4af37;
-  font-weight: bold;
-  font-size: 0.9rem;
-  white-space: nowrap;
+.ribbon-v { position: absolute; background: #d4af37; width: 30px; height: 100%; left: 60px; }
+.ribbon-h { position: absolute; background: #d4af37; width: 100%; height: 30px; top: 60px; }
+
+.bow {
+  position: absolute; width: 60px; height: 60px; background: #d4af37;
+  top: -50px; left: 45px; border-radius: 50% 50% 0 0; z-index: 11;
 }
 
-/* Animations au survol */
-.game-launcher-container:hover {
-  transform: translateX(12px) scale(1.02);
-  background: #d4af37;
+/* Boutons & Messages */
+.nav-surprise {
+  position: absolute; top: 20px; right: 20px;
+  padding: 10px 20px; border: 1px solid #d4af37;
+  color: #d4af37; text-decoration: none; border-radius: 30px;
 }
 
-.game-launcher-container:hover .game-text {
-  color: #1a3a16;
+.error-message {
+  position: absolute; top: -120px; background: white; color: #a31d1d;
+  padding: 10px 20px; border-radius: 20px; opacity: 0; transition: 0.3s;
+}
+.error-message.show { opacity: 1; }
+
+.btn-open {
+  display: block; margin-top: 20px; padding: 15px 30px;
+  background: #d4af37; color: #1a3a16; border-radius: 50px; font-weight: bold; text-decoration: none;
 }
 
-/* Hover spécifique pour le texte des boutons colorés */
-.catch-btn:hover { background: #ff4d6d; border-color: white; }
-.puzzle-btn:hover { background: #4da3ff; border-color: white; }
+.hidden { display: none !important; }
 
-/* Correction pour mobile */
-@media (max-width: 480px) {
+.love-messages { margin-top: 20px; text-align: center; font-size: 0.9rem; }
+
+/* --- ADAPTATION IPHONE / MOBILE --- */
+@media (max-width: 800px) {
+  /* Le menu passe en bas en ligne */
   .side-menu-container {
-      top: 15px;
-      left: 15px;
-      gap: 8px;
+    top: auto;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    transform: none;
+    flex-direction: row;
+    justify-content: flex-start;
+    overflow-x: auto; /* Permet de swiper si trop de boutons */
+    padding: 10px 20px;
+    box-sizing: border-box;
+    gap: 10px;
+    scrollbar-width: none;
   }
+  
+  .side-menu-container::-webkit-scrollbar { display: none; }
+
   .game-launcher-container {
-      padding: 8px 14px;
+    padding: 8px 15px;
+    min-width: 140px;
   }
-}   
 
+  .nav-surprise {
+    top: 10px;
+    right: 10px;
+    font-size: 0.7rem;
+    padding: 6px 12px;
+  }
 
-/* Couleur spécifique pour le bouton Flappy */
-.flappy-btn { 
-  border-color: #63f43f; /* Jaune vif */
+  body {
+    justify-content: flex-start;
+    padding-top: 60px;
+  }
 }
 
-/* Hover spécifique pour Flappy */
-.flappy-btn:hover { 
-  background: #63f43f; 
-  border-color: white; 
-}
-
-.side-menu-container::-webkit-scrollbar {
-  display: none; /* Cache la barre de défilement sur Chrome/Safari */
-}
