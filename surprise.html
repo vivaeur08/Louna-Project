@@ -1,25 +1,47 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
     <title>Notre Aventure</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style-surprise.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="background-decor"></div>
+    <div class="side-menu-container">
+        <div class="game-launcher-container" onclick="window.location.href='jeu.html'">
+            <div class="game-icon">🍬</div>
+            <div class="game-text">Louna Crush</div>
+        </div>
+        <div class="game-launcher-container catch-btn" onclick="window.location.href='catch.html'">
+            <div class="game-icon">🎁</div>
+            <div class="game-text">Louna Catch</div>
+        </div>
+        <div class="game-launcher-container puzzle-btn" onclick="window.location.href='puzzle.html'">
+            <div class="game-icon">🧩</div>
+            <div class="game-text">Puzzle Mystère</div>
+        </div>
+        <div class="game-launcher-container flappy-btn" onclick="window.location.href='flappy.html'">
+            <div class="game-icon">🕊️</div>
+            <div class="game-text">Louna Flappy</div>
+        </div>
+    </div>
 
     <div class="content">
         <header>
             <h1>En route vers le 28 Juin 2026 ❤️</h1>
             <div id="countdown-june">
-                <div class="time-box"><span id="days">00</span><p>Jours</p></div>
+                <div class="time-box">
+                    <span id="days">00</span>
+                    <p>Jours</p>
+                </div>
             </div>
         </header>
 
         <section class="calendar-section">
             <h2>Ton Calendrier de Douceur</h2>
-            <p>Reviens chaque jour pour découvrir un nouveau petit mot...</p>
+            <p class="sub-text">Reviens chaque jour pour découvrir un nouveau petit mot...</p>
             
             <div class="calendar-container">
                 <div id="daily-card" class="daily-card">
