@@ -1,10 +1,10 @@
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const msgEl = document.getElementById('love-message');
 const startScreen = document.getElementById('start-screen');
 
-// Adaptation dynamique de la taille
 function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -13,23 +13,14 @@ window.addEventListener('resize', resize);
 resize();
 
 let bird, pipes, frame, score, gameRunning;
-const messages = ["❤️", "Je", "T'aime", "Louna", "✨", "Ma Vie", "💍", "Pour", "Toujours", "Ma Princesse"];
+const messages = ["❤️", "Je", "T'aime", "Louna", "✨", "Mon Cœur", "💍", "Pour", "Toujours"];
 
 const lounaImg = new Image();
 lounaImg.src = 'louna-head.png'; 
 
 function init() {
-    // Ajustement de la physique selon la hauteur de l'écran
-    const birdSize = Math.min(canvas.width, canvas.height) * 0.12; // Taille proportionnelle
-    bird = { 
-        x: 50, 
-        y: canvas.height / 2, 
-        w: birdSize, 
-        h: birdSize, 
-        gravity: 0.4, 
-        lift: -7, 
-        velocity: 0 
-    };
+    const birdSize = Math.min(canvas.width, canvas.height) * 0.12;
+    bird = { x: 50, y: canvas.height / 2, w: birdSize, h: birdSize, gravity: 0.4, lift: -7, velocity: 0 };
     pipes = [];
     frame = 0;
     score = 0;
@@ -37,7 +28,12 @@ function init() {
     scoreEl.innerText = score;
 }
 
-window.startGame = function() {
+// FONCTION START CORRIGÉE
+window.startGame = function(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation(); // Empêche le saut immédiat au clic
+    }
     init();
     startScreen.style.display = 'none';
     gameRunning = true;
@@ -45,16 +41,10 @@ window.startGame = function() {
 };
 
 function createPipe() {
-    // Espace plus large sur mobile pour ne pas être trop dur
-    let gap = canvas.height * 0.3; 
+    let gap = canvas.height * 0.32; 
     let minPipeHeight = 50;
     let pipeTopHeight = Math.floor(Math.random() * (canvas.height - gap - (minPipeHeight * 2))) + minPipeHeight;
-    pipes.push({ 
-        x: canvas.width, 
-        top: pipeTopHeight, 
-        bottom: canvas.height - pipeTopHeight - gap, 
-        passed: false 
-    });
+    pipes.push({ x: canvas.width, top: pipeTopHeight, bottom: canvas.height - pipeTopHeight - gap, passed: false });
 }
 
 function animate() {
@@ -64,7 +54,6 @@ function animate() {
     bird.velocity += bird.gravity;
     bird.y += bird.velocity;
 
-    // Dessin Louna
     if (lounaImg.complete) {
         ctx.drawImage(lounaImg, bird.x, bird.y, bird.w, bird.h);
     } else {
@@ -78,14 +67,12 @@ function animate() {
 
     for (let i = pipes.length - 1; i >= 0; i--) {
         let p = pipes[i];
-        p.x -= (canvas.width < 600) ? 2.5 : 3.5; // Vitesse adaptée à l'écran
+        p.x -= (canvas.width < 600) ? 2.8 : 4; 
 
-        // Dessin des obstacles (Style doré)
         ctx.fillStyle = "#d4af37";
         ctx.fillRect(p.x, 0, 60, p.top);
         ctx.fillRect(p.x, canvas.height - p.bottom, 60, p.bottom);
 
-        // Score
         if (!p.passed && p.x < bird.x) {
             p.passed = true;
             score++;
@@ -93,8 +80,7 @@ function animate() {
             showLoveMessage();
         }
 
-        // Collision
-        if (bird.x + bird.w * 0.8 > p.x && bird.x < p.x + 60) {
+        if (bird.x + bird.w * 0.7 > p.x && bird.x < p.x + 60) {
             if (bird.y + bird.h * 0.2 < p.top || bird.y + bird.h * 0.8 > canvas.height - p.bottom) {
                 gameOver();
             }
@@ -121,19 +107,28 @@ function gameOver() {
         <h1>Oups ! ❤️</h1>
         <p>Score : ${score}</p>
         <div class="game-over-buttons">
-            <button onclick="startGame()" class="btn-retry">Réessayer</button>
+            <button onclick="startGame(event)" class="btn-retry">Réessayer</button>
             <button onclick="window.location.href='index.html'" class="btn-quit">Quitter</button>
         </div>
     `;
 }
 
-// Contrôles Unifiés (Souris + Tactile)
-const jump = (e) => {
+// CONTRÔLES UNIFIÉS - CORRIGÉS POUR ÉVITER LES BUGS BOUTONS
+const handleInput = (e) => {
+    // Si on touche un bouton, on ne fait rien ici
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+
     if (gameRunning) {
         bird.velocity = bird.lift;
     }
 };
-window.addEventListener('mousedown', jump);
-window.addEventListener('touchstart', (e) => { jump(); }, {passive: true});
+
+window.addEventListener('mousedown', handleInput);
+window.addEventListener('touchstart', (e) => {
+    if (gameRunning) {
+        if (e.cancelable) e.preventDefault();
+        handleInput(e);
+    }
+}, { passive: false });
 
 init();
