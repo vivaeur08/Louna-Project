@@ -4,20 +4,32 @@ const scoreEl = document.getElementById('score');
 const msgEl = document.getElementById('love-message');
 const startScreen = document.getElementById('start-screen');
 
-// Ajustement de la taille du canvas
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// Adaptation dynamique de la taille
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
 
-// Variables du jeu
 let bird, pipes, frame, score, gameRunning;
-const messages = [" ","Je", "T'aime", "À la", "Folie", "Louna", "❤️", "Pour", "Toujours", "Mon", "Amour"];
+const messages = ["❤️", "Je", "T'aime", "Louna", "✨", "Ma Vie", "💍", "Pour", "Toujours", "Ma Princesse"];
 
-// Chargement de l'image de Louna
 const lounaImg = new Image();
 lounaImg.src = 'louna-head.png'; 
 
 function init() {
-    bird = { x: 50, y: canvas.height / 2, w: 50, h: 50, gravity: 0.5, lift: -8, velocity: 0 };
+    // Ajustement de la physique selon la hauteur de l'écran
+    const birdSize = Math.min(canvas.width, canvas.height) * 0.12; // Taille proportionnelle
+    bird = { 
+        x: 50, 
+        y: canvas.height / 2, 
+        w: birdSize, 
+        h: birdSize, 
+        gravity: 0.4, 
+        lift: -7, 
+        velocity: 0 
+    };
     pipes = [];
     frame = 0;
     score = 0;
@@ -25,17 +37,16 @@ function init() {
     scoreEl.innerText = score;
 }
 
-// Fonction de lancement appelée par le bouton
 window.startGame = function() {
-    init(); // Réinitialise tout
+    init();
     startScreen.style.display = 'none';
     gameRunning = true;
     animate();
-    console.log("Jeu démarré !");
 };
 
 function createPipe() {
-    let gap = 180; // Espace pour passer
+    // Espace plus large sur mobile pour ne pas être trop dur
+    let gap = canvas.height * 0.3; 
     let minPipeHeight = 50;
     let pipeTopHeight = Math.floor(Math.random() * (canvas.height - gap - (minPipeHeight * 2))) + minPipeHeight;
     pipes.push({ 
@@ -48,37 +59,33 @@ function createPipe() {
 
 function animate() {
     if (!gameRunning) return;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // --- PHYSIQUE DE L'OISEAU ---
     bird.velocity += bird.gravity;
     bird.y += bird.velocity;
 
-    // --- DESSIN DE L'OISEAU (Louna) ---
-    if (lounaImg.complete && lounaImg.naturalWidth !== 0) {
+    // Dessin Louna
+    if (lounaImg.complete) {
         ctx.drawImage(lounaImg, bird.x, bird.y, bird.w, bird.h);
     } else {
-        // Cercle de secours si l'image ne charge pas
         ctx.fillStyle = "#d4af37";
         ctx.beginPath();
         ctx.arc(bird.x + bird.w/2, bird.y + bird.h/2, bird.w/2, 0, Math.PI * 2);
         ctx.fill();
     }
 
-    // --- GESTION DES TUYAUX (Roses/Cadeaux) ---
-    if (frame % 90 === 0) createPipe();
+    if (frame % 100 === 0) createPipe();
 
     for (let i = pipes.length - 1; i >= 0; i--) {
         let p = pipes[i];
-        p.x -= 3; // Vitesse de défilement
+        p.x -= (canvas.width < 600) ? 2.5 : 3.5; // Vitesse adaptée à l'écran
 
-        // Dessin des obstacles
+        // Dessin des obstacles (Style doré)
         ctx.fillStyle = "#d4af37";
-        ctx.fillRect(p.x, 0, 60, p.top); // Tuyau du haut
-        ctx.fillRect(p.x, canvas.height - p.bottom, 60, p.bottom); // Tuyau du bas
+        ctx.fillRect(p.x, 0, 60, p.top);
+        ctx.fillRect(p.x, canvas.height - p.bottom, 60, p.bottom);
 
-        // Score + Message
+        // Score
         if (!p.passed && p.x < bird.x) {
             p.passed = true;
             score++;
@@ -87,20 +94,15 @@ function animate() {
         }
 
         // Collision
-        if (bird.x + bird.w > p.x && bird.x < p.x + 60) {
-            if (bird.y < p.top || bird.y + bird.h > canvas.height - p.bottom) {
+        if (bird.x + bird.w * 0.8 > p.x && bird.x < p.x + 60) {
+            if (bird.y + bird.h * 0.2 < p.top || bird.y + bird.h * 0.8 > canvas.height - p.bottom) {
                 gameOver();
             }
         }
-
-        // Supprimer les tuyaux hors écran
         if (p.x < -60) pipes.splice(i, 1);
     }
 
-    // Sortie d'écran
-    if (bird.y + bird.h > canvas.height || bird.y < 0) {
-        gameOver();
-    }
+    if (bird.y + bird.h > canvas.height || bird.y < 0) gameOver();
 
     frame++;
     requestAnimationFrame(animate);
@@ -109,36 +111,29 @@ function animate() {
 function showLoveMessage() {
     msgEl.innerText = messages[score % messages.length];
     msgEl.style.opacity = "1";
-    setTimeout(() => { msgEl.style.opacity = "0"; }, 800);
+    setTimeout(() => { msgEl.style.opacity = "0"; }, 700);
 }
 
 function gameOver() {
     gameRunning = false;
     startScreen.style.display = 'block';
-    
-    // On crée une structure avec deux boutons
     startScreen.innerHTML = `
         <h1>Oups ! ❤️</h1>
         <p>Score : ${score}</p>
         <div class="game-over-buttons">
             <button onclick="startGame()" class="btn-retry">Réessayer</button>
-            <button onclick="window.location.href='index.html'" class="btn-quit">Menu</button>
+            <button onclick="window.location.href='index.html'" class="btn-quit">Quitter</button>
         </div>
     `;
 }
 
-// Contrôles
+// Contrôles Unifiés (Souris + Tactile)
 const jump = (e) => {
     if (gameRunning) {
         bird.velocity = bird.lift;
     }
 };
-
 window.addEventListener('mousedown', jump);
-window.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    jump();
-}, {passive: false});
+window.addEventListener('touchstart', (e) => { jump(); }, {passive: true});
 
-// Initialisation au chargement
 init();
