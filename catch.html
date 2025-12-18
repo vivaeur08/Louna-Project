@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Louna Catch - Attrape mon Amour</title>
+    <link rel="stylesheet" href="style-catch.css">
+</head>
+<body>
+    <div id="game-container">
+        <div class="header">
+            <div class="score-box">Score: <span id="score">0</span></div>
+            <div class="best-box">Record: <span id="best">0</span></div>
+            <a href="index.html" class="btn-exit">Quitter</a>
+        </div>
+
+        <div id="game-area">
+            <div id="basket">🧺</div>
+        </div>
+
+        <div id="game-over" class="hidden">
+            <div class="modal">
+                <h2>Partie Finie !</h2>
+                <p>Tu as attrapé <span id="final-score">0</span> preuves d'amour !</p>
+                <button onclick="resetGame()" class="btn-restart">Rejouer</button>
+            </div>
+        </div>
+    </div>
+    <script src="script-catch.js"></script>
+</body>
+</html>

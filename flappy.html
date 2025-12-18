@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Louna Flappy - Vole !</title>
+    <link rel="stylesheet" href="style-flappy.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="score-board">Score: <span id="score">0</span></div>
+        <div id="love-message" class="hidden"></div>
+        
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="start-screen">
+            <h1>Louna Flappy</h1>
+            <p>Clique pour t'envoler !</p>
+            <button onclick="startGame()">Commencer</button>
+        </div>
+    </div>
+    <script src="script-flappy.js"></script>
+</body>
+</html>

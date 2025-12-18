@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Joyeux Noël mon Amour</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <div class="container">
+        <h1 class="title">Joyeux Noël, Louna 🎄</h1>
+
+        <div id="countdown">
+            <div class="time-box"><span id="days">00</span><p>Jours</p></div>
+            <div class="time-box"><span id="hours">00</span><p>Heures</p></div>
+            <div class="time-box"><span id="minutes">00</span><p>Min</p></div>
+            <div class="time-box"><span id="seconds">00</span><p>Sec</p></div>
+        </div>
+        <a href="surprise.html" class="nav-surprise">✨ Notre Aventure</a>
+        <div class="side-menu-container">
+            <div class="game-launcher-container" onclick="window.location.href='jeu.html'">
+                <div class="game-icon">🍬</div>
+                <div class="game-text">Louna Crush</div>
+            </div>
+        
+            <div class="game-launcher-container catch-btn" onclick="window.location.href='catch.html'">
+                <div class="game-icon">🎁</div>
+                <div class="game-text">Louna Catch</div>
+            </div>
+        
+            <div class="game-launcher-container puzzle-btn" onclick="window.location.href='puzzle.html'">
+                <div class="game-icon">🧩</div>
+                <div class="game-text">Puzzle Mystère</div>
+            </div>
+            
+            <div class="game-launcher-container flappy-btn" onclick="window.location.href='flappy.html'">
+                <div class="game-icon">🕊️</div>
+                <div class="game-text">Louna Flappy</div>
+            </div>
+        </div>
+        <div class="gift-section">
+            <div id="click-message" class="error-message">Pas encore, Tu dois attendre Noël ! 😉</div>
+            
+            <div id="gift" class="gift">
+                <div class="gift-lid"></div>
+                <div class="gift-box">
+                    <div class="ribbon-v"></div>
+                    <div class="ribbon-h"></div>
+                </div>
+                <div class="bow"></div>
+            </div>
+
+            <div id="surprise-link" class="hidden">
+                <a href="surprise.html" class="btn-open">Ouvrir mon cadeau ❤️</a>
+            </div>  
+            <div class="love-message">Fait avec amour pour louna — Noël 2025</div>
+            <div class="love-message">Click sur le cadeau</div>
+        </div>
+    </div>
+
+    
+
+    <script src="script.js"></script>
+</body>
+</html>

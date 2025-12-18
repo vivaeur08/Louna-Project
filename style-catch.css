@@ -1,0 +1,63 @@
+:root {
+  --bg-color: #1a3a16;
+  --accent: #d4af37;
+}
+
+body, html {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  overflow: hidden; background: var(--bg-color);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+#game-container {
+  width: 100%; height: 100%; position: relative;
+  background: linear-gradient(to bottom, #1a3a16, #2d5a27);
+}
+
+.header {
+  position: absolute; top: 0; width: 100%; padding: 15px;
+  display: flex; justify-content: space-around; align-items: center;
+  z-index: 10; color: var(--accent); font-weight: bold;
+}
+
+#game-area {
+  width: 100%; height: 100%; position: relative; overflow: hidden;
+}
+
+#basket {
+  position: absolute; bottom: 20px; left: 50%;
+  width: 60px; height: 60px; font-size: 50px;
+  display: flex; justify-content: center; align-items: center;
+  transform: translateX(-50%); touch-action: none;
+}
+
+.falling-item {
+  position: absolute; font-size: 30px;
+  user-select: none;
+}
+
+.bonus-19 {
+  font-weight: bold; color: var(--accent);
+  text-shadow: 0 0 10px white; font-size: 40px;
+}
+
+#game-over {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+  display: flex; justify-content: center; align-items: center; z-index: 100;
+}
+
+.modal {
+  background: white; padding: 30px; border-radius: 20px; text-align: center; color: #333;
+}
+
+.hidden { display: none !important; }
+
+.btn-restart {
+  background: var(--accent); color: white; border: none;
+  padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold;
+}
+
+.btn-exit {
+  text-decoration: none; color: white; background: rgba(255,255,255,0.1);
+  padding: 5px 15px; border-radius: 15px; font-size: 0.8rem;
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Mystère - Louna</title>
+    <link rel="stylesheet" href="style-puzzle.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1 class="title-gold">Puzzle Mystère ❤️</h1>
+        </header>
+        <div class="back-home-container" onclick="window.location.href='index.html'">
+            <span>🏠 Menu Principal</span>
+        </div>
+
+        <div id="selection-screen">
+            <p>Choisis un souvenir à reconstruire :</p>
+            <div class="photo-options">
+                <img src="photo1.jpg" class="option" onclick="startGame('photo1.jpg')">
+                <img src="photo2.jpg" class="option" onclick="startGame('photo2.jpg')"> 
+                <img src="photo3.jpg" class="option" onclick="startGame('photo3.jpg')"> 
+                <img src="photo4.jpg" class="option" onclick="startGame('photo4.jpg')"> 
+                <img src="photo5.jpg" class="option" onclick="startGame('photo5.jpg')"> 
+            </div>
+        </div>
+
+        <div id="game-area" class="hidden">
+            <div id="board"></div>
+            <button id="btn-back-selection" onclick="location.reload()">Changer de photo</button>
+        </div>
+
+        <div id="victory-screen" class="hidden">
+            <div class="modal">
+                <h2 class="animate-text">Félicitations mon amour !</h2>
+                <p class="final-msg">"Voilà, tu as reconstruit un de nos plus beaux souvenirs."</p>
+                <div id="reveal-surprise">
+                    <p>Ton cadeau se trouve : <strong> Je t'aime </strong> 🎁</p>
+                </div>
+                <button onclick="window.location.href='index.html'" class="btn-main">Retour au menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="script-puzzle.js"></script>
+</body>
+</html>

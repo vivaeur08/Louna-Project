@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Louna Crush - 100 Niveaux d'Amour</title>
+    <link rel="stylesheet" href="style-jeu.css">
+</head>
+<body>
+    <div id="login-screen" class="overlay">
+        <div class="modal shadow">
+            <h2 class="title-gold">Louna Crush</h2>
+            <p>Entre ton prénom pour charger ta progression :</p>
+            <input type="text" id="player-name" placeholder="Ton prénom..." autocomplete="off">
+            <button id="start-game-btn" class="btn-main">Entrer dans l'aventure</button>
+        </div>
+    </div>
+
+    <div id="game-ui" class="game-container hidden">
+        <header class="game-header">
+            <div class="stat">Niveau <span id="level-num">1</span></div>
+            <div class="stat">Objectif <span id="target">500</span></div>
+            <div class="stat">Coups <span id="moves">25</span></div>
+        </header>
+
+        <div class="score-container">
+            <span>Score actuel : </span><span id="score">0</span>
+        </div>
+
+        <div id="grid" class="grid"></div>
+
+        <div class="game-footer">
+            <a href="index.html" class="btn-quit">Quitter</a>
+            <button id="reset-btn" class="btn-reset">Recommencer</button>
+        </div>
+    </div>
+    <div class="game-footer">
+        <button id="hard-reset-btn" class="btn-hard-reset">Retour Niv. 1</button>
+    </div>
+    <div id="overlay" class="overlay hidden">
+        <div class="modal animate-pop">
+            <h2 id="modal-title">Félicitations !</h2>
+            <p id="modal-msg">Niveau terminé avec succès.</p>
+            <button id="next-btn" class="btn-main">Niveau Suivant</button>
+        </div>
+    </div>
+
+    <script src="script-jeu.js"></script>
+</body>
+</html>
