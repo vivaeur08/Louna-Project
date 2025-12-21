@@ -1,51 +1,75 @@
 // --- CONFIGURATION ---
 const candies = ['❤️', '💎', '⭐', '🌸', '🍬'];
+const bonusEmoji = '🎁'; 
 const width = 8;
 let grid = [];
 let score = 0;
 let level = 1;
 let moves = 25;
+let coins = 0;
 let targetScore = 500;
 let playerName = "";
+let isActionProcessing = false; 
 
-// Variables pour le Drag & Swipe
-let colorBeingDragged, colorBeingReplaced, squareIdBeingDragged, squareIdBeingReplaced;
-let startX, startY, endX, endY;
-
-const gridDisplay = document.querySelector('.grid');
+// Sélecteurs
+const gridDisplay = document.getElementById('grid');
 const scoreDisplay = document.getElementById('score');
 const movesDisplay = document.getElementById('moves');
 const levelDisplay = document.getElementById('level-num');
 const targetDisplay = document.getElementById('target');
+const coinsDisplay = document.getElementById('coins-display');
+const errorMsg = document.getElementById('error-msg');
 
-// --- CONNEXION ET SAUVEGARDE ---
+// --- 1. CONNEXION MANUELLE ---
 document.getElementById('start-game-btn').addEventListener('click', () => {
-    const input = document.getElementById('player-name').value.trim();
-    if (input.toLowerCase() === "louna") {
-        playerName = "louna";
-        // Charger le niveau spécifique à Louna
-        level = parseInt(localStorage.getItem('lounaCrush_level')) || 1;
+    const inputVal = document.getElementById('player-name-input').value.trim().toLowerCase();
+    
+    if (inputVal === "louna" || inputVal === "test") {
+        playerName = inputVal;
+        loadData();
+        
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('game-ui').classList.remove('hidden');
+        document.getElementById('shop-sidebar').classList.remove('hidden');
+        
         startLevel();
     } else {
-        alert("Accès réservé à Louna ❤️");
+        errorMsg.style.display = 'block';
+        setTimeout(() => { errorMsg.style.display = 'none'; }, 2000);
     }
 });
 
+function loadData() {
+    const savedLevel = localStorage.getItem('louna_save_level_' + playerName);
+    const savedCoins = localStorage.getItem('louna_save_coins_' + playerName);
+    level = savedLevel ? parseInt(savedLevel) : 1;
+    coins = savedCoins ? parseInt(savedCoins) : 0;
+    updateUI();
+}
+
+function saveData() {
+    localStorage.setItem('louna_save_level_' + playerName, level);
+    localStorage.setItem('louna_save_coins_' + playerName, coins);
+}
+
+// --- 2. LE JEU ---
 function startLevel() {
+    isActionProcessing = false;
     score = 0;
+    targetScore = 500 + (level * 250);
+    // Difficulté progressive
+    moves = Math.max(12, 30 - Math.floor(level / 4));
+    
+    updateUI();
+    createBoard();
+}
+
+function updateUI() {
     scoreDisplay.innerText = score;
     levelDisplay.innerText = level;
-    
-    // Difficulté croissante : +200 points par niveau, coups limités
-    targetScore = 500 + (level * 200);
-    moves = Math.max(8, 25 - Math.floor(level / 8));
-    
     targetDisplay.innerText = targetScore;
     movesDisplay.innerText = moves;
-    
-    createBoard();
+    coinsDisplay.innerText = coins;
 }
 
 function createBoard() {
@@ -53,39 +77,48 @@ function createBoard() {
     grid = [];
     for (let i = 0; i < width * width; i++) {
         const square = document.createElement('div');
-        square.setAttribute('draggable', true);
         square.setAttribute('id', i);
-        let randomCandy = candies[Math.floor(Math.random() * candies.length)];
-        square.innerText = randomCandy;
+        square.setAttribute('draggable', true);
+        square.innerText = getRandomCandy();
         
-        // --- ÉVÉNEMENTS DESKTOP (SOURIS) ---
+        // Events
         square.addEventListener('dragstart', dragStart);
         square.addEventListener('dragover', (e) => e.preventDefault());
         square.addEventListener('drop', dragDrop);
-        
-        // --- ÉVÉNEMENTS MOBILE (TACTILE) ---
-        square.addEventListener('touchstart', touchStart, {passive: true});
-        square.addEventListener('touchend', touchEnd, {passive: true});
-        
+        square.addEventListener('touchstart', touchStart, {passive: false});
+        square.addEventListener('touchend', touchEnd, {passive: false});
+
         gridDisplay.appendChild(square);
         grid.push(square);
     }
 }
 
-// --- LOGIQUE DE MOUVEMENT (DESKTOP) ---
+function getRandomCandy() {
+    // 2% de chance d'avoir un bonus, n'augmente PAS avec le niveau
+    const isBonus = Math.random() < 0.02; 
+    return isBonus ? bonusEmoji : candies[Math.floor(Math.random() * candies.length)];
+}
+
+// --- 3. MOUVEMENTS ---
+let colorBeingDragged, colorBeingReplaced, squareIdBeingDragged, squareIdBeingReplaced;
+let startX, startY;
+
 function dragStart() {
+    if(isActionProcessing) return;
     colorBeingDragged = this.innerText;
     squareIdBeingDragged = parseInt(this.id);
 }
 
 function dragDrop() {
-    squareIdBeingReplaced = parseInt(this.id);
+    if(isActionProcessing) return;
     colorBeingReplaced = this.innerText;
+    squareIdBeingReplaced = parseInt(this.id);
     executeMove();
 }
 
-// --- LOGIQUE DE MOUVEMENT (MOBILE) ---
 function touchStart(e) {
+    if(isActionProcessing) return;
+    e.preventDefault();
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     squareIdBeingDragged = parseInt(e.target.id);
@@ -93,22 +126,20 @@ function touchStart(e) {
 }
 
 function touchEnd(e) {
-    endX = e.changedTouches[0].clientX;
-    endY = e.changedTouches[0].clientY;
-    
+    if(isActionProcessing) return;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
     const diffX = endX - startX;
     const diffY = endY - startY;
-    let targetId;
-
-    if (Math.abs(diffX) > Math.abs(diffY)) { // Swipe horizontal
-        targetId = diffX > 0 ? squareIdBeingDragged + 1 : squareIdBeingDragged - 1;
-    } else { // Swipe vertical
-        targetId = diffY > 0 ? squareIdBeingDragged + width : squareIdBeingDragged - width;
+    
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+        squareIdBeingReplaced = diffX > 0 ? squareIdBeingDragged + 1 : squareIdBeingDragged - 1;
+    } else {
+        squareIdBeingReplaced = diffY > 0 ? squareIdBeingDragged + width : squareIdBeingDragged - width;
     }
-
-    if (targetId >= 0 && targetId < width * width) {
-        squareIdBeingReplaced = targetId;
-        colorBeingReplaced = grid[targetId].innerText;
+    
+    if (squareIdBeingReplaced >= 0 && squareIdBeingReplaced < 64) {
+        colorBeingReplaced = grid[squareIdBeingReplaced].innerText;
         executeMove();
     }
 }
@@ -122,104 +153,168 @@ function executeMove() {
     if (validMoves.includes(squareIdBeingReplaced)) {
         grid[squareIdBeingReplaced].innerText = colorBeingDragged;
         grid[squareIdBeingDragged].innerText = colorBeingReplaced;
-        
-        moves--;
-        movesDisplay.innerText = moves;
-        
-        // Laisser un petit délai pour que checkMatches s'occupe de la suite
-        setTimeout(checkGameStatus, 500);
+
+        setTimeout(() => {
+            let matchFound = checkMatches();
+            if (!matchFound) {
+                grid[squareIdBeingReplaced].innerText = colorBeingReplaced;
+                grid[squareIdBeingDragged].innerText = colorBeingDragged;
+            } else {
+                moves--;
+                updateUI();
+                // Si plus de coups après ce mouvement valide mais pas gagnant
+                if (moves === 0 && score < targetScore) checkWinCondition();
+            }
+        }, 100);
     }
 }
 
-// --- LOGIQUE MATCHES & CHUTE ---
+// --- 4. LOGIQUE MATCH & GRAVITÉ ---
 function checkMatches() {
+    let matches = new Set();
+
     // Horizontal
-    for (let i = 0; i < 62; i++) {
-        let row = [i, i + 1, i + 2];
-        let decidedColor = grid[i].innerText;
-        if (i % 8 > 5) continue; 
-        if (decidedColor !== '' && row.every(index => grid[index].innerText === decidedColor)) {
-            score += 30;
-            scoreDisplay.innerText = score;
-            row.forEach(index => grid[index].innerText = '');
+    for (let i = 0; i < 64; i++) {
+        if (i % width > width - 3) continue;
+        let row = [i, i+1, i+2];
+        let color = grid[i].innerText;
+        if (color === '') continue;
+        
+        if (row.every(index => grid[index].innerText === color || (grid[index].innerText === bonusEmoji && color !== ''))) {
+            let k = i + 3;
+            while(k % width !== 0 && grid[k].innerText === color) { row.push(k); k++; }
+            row.forEach(idx => matches.add(idx));
         }
     }
+
     // Vertical
-    for (let i = 0; i < 47; i++) {
-        let col = [i, i + width, i + width * 2];
-        let decidedColor = grid[i].innerText;
-        if (decidedColor !== '' && col.every(index => grid[index].innerText === decidedColor)) {
-            score += 30;
-            scoreDisplay.innerText = score;
-            col.forEach(index => grid[index].innerText = '');
+    for (let i = 0; i < 48; i++) {
+        let col = [i, i+width, i+width*2];
+        let color = grid[i].innerText;
+        if (color === '') continue;
+
+        if (col.every(index => grid[index].innerText === color || (grid[index].innerText === bonusEmoji && color !== ''))) {
+             let k = i + width * 3;
+             while(k < 64 && grid[k].innerText === color) { col.push(k); k += width; }
+            col.forEach(idx => matches.add(idx));
         }
     }
-    moveDown();
+
+    if (matches.size > 0) {
+        processMatches(Array.from(matches));
+        return true;
+    }
+    return false;
 }
 
+function processMatches(indices) {
+    isActionProcessing = true;
+    let bonusCount = 0;
+
+    indices.forEach(index => {
+        if (grid[index].innerText === bonusEmoji) bonusCount++;
+        grid[index].innerText = ''; // Disparition
+    });
+
+    if (bonusCount > 0) {
+        moves += (bonusCount * 5); // +5 coups par cadeau
+        updateUI();
+    }
+
+    // Calcul score
+    let points = indices.length * 10;
+    if (indices.length > 3) points += (indices.length - 3) * 20;
+    score += points;
+    updateUI();
+
+    // Délai pour la chute
+    setTimeout(() => {
+        moveDown();
+    }, 250);
+}
+
+// --- CORRECTION DU BUG DE DISPARITION ---
 function moveDown() {
-    // Faire descendre les bonbons existants
-    for (let i = 0; i < 56; i++) {
-        if (grid[i + width].innerText === '') {
-            grid[i + width].innerText = grid[i].innerText;
-            grid[i].innerText = '';
+    // On répète l'opération 4 fois pour s'assurer que tout tombe bien jusqu'en bas
+    // C'est une méthode bruteforce mais très efficace pour les petits jeux
+    for(let x = 0; x < 4; x++) {
+        for (let i = 0; i < 56; i++) {
+            if (grid[i + width].innerText === '') {
+                grid[i + width].innerText = grid[i].innerText;
+                grid[i].innerText = '';
+            }
+        }
+        // Remplissage de la première ligne si vide
+        for (let i = 0; i < width; i++) {
+            if (grid[i].innerText === '') {
+                grid[i].innerText = getRandomCandy();
+            }
         }
     }
-    // Remplir la ligne du haut
-    for (let i = 0; i < 8; i++) {
-        if (grid[i].innerText === '') {
-            grid[i].innerText = candies[Math.floor(Math.random() * candies.length)];
+
+    // Vérification finale : est-ce qu'il reste des trous ?
+    let hasEmpty = false;
+    for(let i=0; i<64; i++) {
+        if(grid[i].innerText === '') {
+            grid[i].innerText = getRandomCandy(); // Remplissage de secours
+            hasEmpty = true;
         }
     }
-}
 
-function checkGameStatus() {
-    if (score >= targetScore) {
-        showModal(true);
-    } else if (moves <= 0) {
-        showModal(false);
-    }
-}
-
-function showModal(win) {
-    const overlay = document.getElementById('overlay');
-    const title = document.getElementById('modal-title');
-    const msg = document.getElementById('modal-msg');
-    overlay.classList.remove('hidden');
-
-    if (win) {
-        if (level >= 100) {
-            title.innerText = "INCROYABLE !";
-            msg.innerText = "Tu as fini les 100 niveaux. Je t'aime à l'infini Louna. ❤️";
+    // Une fois stabilisé, on revérifie les matchs
+    setTimeout(() => {
+        if (checkMatches()) {
+            // Ça re-boucle tant qu'il y a des matchs
         } else {
-            title.innerText = "Niveau Réussi !";
-            msg.innerText = `Bravo Louna, prête pour le niveau ${level + 1} ?`;
-            level++;
-            localStorage.setItem('lounaCrush_level', level);
+            isActionProcessing = false;
+            checkWinCondition();
         }
-    } else {
-        title.innerText = "Oups !";
-        msg.innerText = "Plus de coups... Réessaie pour ton amoureux !";
+    }, 300);
+}
+
+// --- 5. FIN DU JEU ---
+function checkWinCondition() {
+    if (score >= targetScore) {
+        coins += 50;
+        level++;
+        saveData();
+        showModal("Niveau Réussi !", `Bravo ${playerName} ! Tu as gagné 50 pièces.`, true);
+    } else if (moves <= 0) {
+        showModal("Oups !", "Achète des coups au shop ou recommence !", false);
     }
 }
 
-// --- BOUTONS ---
-document.getElementById('next-btn').addEventListener('click', () => {
-    document.getElementById('overlay').classList.add('hidden');
-    startLevel();
+function showModal(titleText, msgText, isWin) {
+    const overlay = document.getElementById('overlay');
+    document.getElementById('modal-title').innerText = titleText;
+    document.getElementById('modal-msg').innerText = msgText;
+    
+    const nextBtn = document.getElementById('next-btn');
+    nextBtn.innerText = isWin ? "Niveau Suivant" : "Réessayer";
+    nextBtn.onclick = () => {
+        overlay.classList.add('hidden');
+        startLevel();
+    };
+    overlay.classList.remove('hidden');
+}
+
+// --- BOUTONS RESET & SHOP ---
+document.getElementById('buy-moves-btn').addEventListener('click', () => {
+    if (coins >= 100) {
+        coins -= 100;
+        moves += 5;
+        saveData();
+        updateUI();
+    } else {
+        alert("Pas assez de pièces !");
+    }
 });
 
 document.getElementById('reset-btn').addEventListener('click', startLevel);
-
 document.getElementById('hard-reset-btn').addEventListener('click', () => {
-    if (confirm("Louna, veux-tu vraiment recommencer l'aventure au niveau 1 ?")) {
+    if (confirm("Tout effacer et retourner au niveau 1 ?")) {
         level = 1;
-        localStorage.setItem('lounaCrush_level', level);
+        saveData();
         startLevel();
     }
 });
-
-// --- BOUCLE DE JEU (Chute et Matches permanents) ---
-window.setInterval(function() {
-    checkMatches();
-}, 100);
