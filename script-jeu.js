@@ -11,6 +11,10 @@ let targetScore = 500;
 let playerName = "";
 let isActionProcessing = false; 
 
+// Variables pour le Drag & Swipe (iPhone inclue)
+let colorBeingDragged, colorBeingReplaced, squareIdBeingDragged, squareIdBeingReplaced;
+let startX, startY;
+
 // Sélecteurs
 const gridDisplay = document.getElementById('grid');
 const scoreDisplay = document.getElementById('score');
@@ -57,7 +61,6 @@ function startLevel() {
     isActionProcessing = false;
     score = 0;
     targetScore = 500 + (level * 250);
-    // Difficulté progressive
     moves = Math.max(12, 30 - Math.floor(level / 4));
     
     updateUI();
@@ -81,11 +84,14 @@ function createBoard() {
         square.setAttribute('draggable', true);
         square.innerText = getRandomCandy();
         
-        // Events
+        // Événements Souris (PC)
         square.addEventListener('dragstart', dragStart);
         square.addEventListener('dragover', (e) => e.preventDefault());
         square.addEventListener('drop', dragDrop);
+        
+        // Événements Tactiles (iPhone) - CORRECTIF INCLUS
         square.addEventListener('touchstart', touchStart, {passive: false});
+        square.addEventListener('touchmove', (e) => { if(e.cancelable) e.preventDefault(); }, {passive: false});
         square.addEventListener('touchend', touchEnd, {passive: false});
 
         gridDisplay.appendChild(square);
@@ -94,14 +100,11 @@ function createBoard() {
 }
 
 function getRandomCandy() {
-    // 2% de chance d'avoir un bonus, n'augmente PAS avec le niveau
     const isBonus = Math.random() < 0.02; 
     return isBonus ? bonusEmoji : candies[Math.floor(Math.random() * candies.length)];
 }
 
-// --- 3. MOUVEMENTS ---
-let colorBeingDragged, colorBeingReplaced, squareIdBeingDragged, squareIdBeingReplaced;
-let startX, startY;
+// --- 3. MOUVEMENTS (SOURIS & TACTILE) ---
 
 function dragStart() {
     if(isActionProcessing) return;
@@ -118,27 +121,35 @@ function dragDrop() {
 
 function touchStart(e) {
     if(isActionProcessing) return;
-    e.preventDefault();
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
-    squareIdBeingDragged = parseInt(e.target.id);
-    colorBeingDragged = e.target.innerText;
+    const target = document.elementFromPoint(startX, startY);
+    if (target && target.parentNode === gridDisplay) {
+        squareIdBeingDragged = parseInt(target.id);
+        colorBeingDragged = target.innerText;
+    }
 }
 
 function touchEnd(e) {
-    if(isActionProcessing) return;
+    if(isActionProcessing || isNaN(squareIdBeingDragged)) return;
     const endX = e.changedTouches[0].clientX;
     const endY = e.changedTouches[0].clientY;
     const diffX = endX - startX;
     const diffY = endY - startY;
-    
-    if (Math.abs(diffX) > Math.abs(diffY)) {
+    const threshold = 30; 
+
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > threshold) {
         squareIdBeingReplaced = diffX > 0 ? squareIdBeingDragged + 1 : squareIdBeingDragged - 1;
-    } else {
+    } else if (Math.abs(diffY) > threshold) {
         squareIdBeingReplaced = diffY > 0 ? squareIdBeingDragged + width : squareIdBeingDragged - width;
-    }
-    
+    } else { return; }
+
+    const isRightEdge = (squareIdBeingDragged % width === width - 1);
+    const isLeftEdge = (squareIdBeingDragged % width === 0);
+
     if (squareIdBeingReplaced >= 0 && squareIdBeingReplaced < 64) {
+        if (isRightEdge && squareIdBeingReplaced === squareIdBeingDragged + 1) return;
+        if (isLeftEdge && squareIdBeingReplaced === squareIdBeingDragged - 1) return;
         colorBeingReplaced = grid[squareIdBeingReplaced].innerText;
         executeMove();
     }
@@ -151,6 +162,7 @@ function executeMove() {
     ];
 
     if (validMoves.includes(squareIdBeingReplaced)) {
+        isActionProcessing = true;
         grid[squareIdBeingReplaced].innerText = colorBeingDragged;
         grid[squareIdBeingDragged].innerText = colorBeingReplaced;
 
@@ -159,40 +171,36 @@ function executeMove() {
             if (!matchFound) {
                 grid[squareIdBeingReplaced].innerText = colorBeingReplaced;
                 grid[squareIdBeingDragged].innerText = colorBeingDragged;
+                isActionProcessing = false;
             } else {
                 moves--;
                 updateUI();
-                // Si plus de coups après ce mouvement valide mais pas gagnant
                 if (moves === 0 && score < targetScore) checkWinCondition();
             }
-        }, 100);
+        }, 200);
     }
 }
 
 // --- 4. LOGIQUE MATCH & GRAVITÉ ---
 function checkMatches() {
     let matches = new Set();
-
     // Horizontal
     for (let i = 0; i < 64; i++) {
         if (i % width > width - 3) continue;
         let row = [i, i+1, i+2];
         let color = grid[i].innerText;
         if (color === '') continue;
-        
         if (row.every(index => grid[index].innerText === color || (grid[index].innerText === bonusEmoji && color !== ''))) {
             let k = i + 3;
             while(k % width !== 0 && grid[k].innerText === color) { row.push(k); k++; }
             row.forEach(idx => matches.add(idx));
         }
     }
-
     // Vertical
     for (let i = 0; i < 48; i++) {
         let col = [i, i+width, i+width*2];
         let color = grid[i].innerText;
         if (color === '') continue;
-
         if (col.every(index => grid[index].innerText === color || (grid[index].innerText === bonusEmoji && color !== ''))) {
              let k = i + width * 3;
              while(k < 64 && grid[k].innerText === color) { col.push(k); k += width; }
@@ -208,35 +216,26 @@ function checkMatches() {
 }
 
 function processMatches(indices) {
-    isActionProcessing = true;
     let bonusCount = 0;
-
     indices.forEach(index => {
         if (grid[index].innerText === bonusEmoji) bonusCount++;
-        grid[index].innerText = ''; // Disparition
+        grid[index].innerText = ''; 
     });
 
     if (bonusCount > 0) {
-        moves += (bonusCount * 5); // +5 coups par cadeau
+        moves += (bonusCount * 5);
         updateUI();
     }
 
-    // Calcul score
     let points = indices.length * 10;
     if (indices.length > 3) points += (indices.length - 3) * 20;
     score += points;
     updateUI();
 
-    // Délai pour la chute
-    setTimeout(() => {
-        moveDown();
-    }, 250);
+    setTimeout(moveDown, 250);
 }
 
-// --- CORRECTION DU BUG DE DISPARITION ---
 function moveDown() {
-    // On répète l'opération 4 fois pour s'assurer que tout tombe bien jusqu'en bas
-    // C'est une méthode bruteforce mais très efficace pour les petits jeux
     for(let x = 0; x < 4; x++) {
         for (let i = 0; i < 56; i++) {
             if (grid[i + width].innerText === '') {
@@ -244,27 +243,14 @@ function moveDown() {
                 grid[i].innerText = '';
             }
         }
-        // Remplissage de la première ligne si vide
         for (let i = 0; i < width; i++) {
-            if (grid[i].innerText === '') {
-                grid[i].innerText = getRandomCandy();
-            }
+            if (grid[i].innerText === '') grid[i].innerText = getRandomCandy();
         }
     }
 
-    // Vérification finale : est-ce qu'il reste des trous ?
-    let hasEmpty = false;
-    for(let i=0; i<64; i++) {
-        if(grid[i].innerText === '') {
-            grid[i].innerText = getRandomCandy(); // Remplissage de secours
-            hasEmpty = true;
-        }
-    }
-
-    // Une fois stabilisé, on revérifie les matchs
     setTimeout(() => {
         if (checkMatches()) {
-            // Ça re-boucle tant qu'il y a des matchs
+            // Re-boucle si nouveaux matchs
         } else {
             isActionProcessing = false;
             checkWinCondition();
@@ -318,3 +304,4 @@ document.getElementById('hard-reset-btn').addEventListener('click', () => {
         startLevel();
     }
 });
+
