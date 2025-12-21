@@ -84,3 +84,42 @@ input[type="text"] {
     .shop { flex-direction: row; display: flex; width: 90%; justify-content: space-around; padding: 5px; }
     .grid div { font-size: 1.5rem; }
 }
+
+/* --- CORRECTIF ANTI-CASSE IPHONE --- */
+#game-container-wrapper {
+    display: flex;
+    flex-direction: column; /* Empile les éléments au lieu de les mettre côte à côte */
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 100vh;
+    padding: env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
+}
+
+.shop {
+    display: flex;
+    flex-direction: row; /* Le shop devient une barre horizontale sur iPhone */
+    justify-content: space-around;
+    align-items: center;
+    width: 95% !important;
+    height: auto;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    border: 1px solid var(--accent);
+}
+
+.shop h3 { display: none; } /* On cache le titre "Shop" pour gagner de l'espace */
+
+.game-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.grid {
+    width: 92vw; /* La grille s'adapte à la largeur du téléphone */
+    height: 92vw;
+    max-width: 380px;
+    max-height: 380px;
+    margin: 0 auto;
+}
