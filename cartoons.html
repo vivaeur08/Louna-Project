@@ -61,6 +61,40 @@
         }
         .fav-badge.active { color: #ff4d6d; }
 
+        /* Styles pour les effets de pluie (Coeurs/Flocons) */
+        .falling-item {
+            position: fixed;
+            top: -50px;
+            z-index: 9999;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+            }
+        }
+
+        /* Style Message Noël */
+        #christmas-msg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            border: 5px solid var(--accent);
+            text-align: center;
+            z-index: 10000;
+            font-size: 2rem;
+            display: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            width: 80%;
+        }
+
         .modal-episodes { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.98); 
             display: none; flex-direction: column; padding: 20px; z-index: 2000; 
@@ -80,12 +114,12 @@
         }
         .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-        .floating-item { position: fixed; top: -50px; font-size: 2rem; pointer-events: none; z-index: 3000; animation: fall linear forwards; }
-        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
+
+<div id="christmas-msg">🎄 Joyeux Noël Mon amour 🎁</div>
 
 <div class="tv-container">
     <header>
@@ -245,80 +279,64 @@
                 {n: "Ep 40", id: "QeOXU9Hlqgg"}, {n: "Ep 41", id: "VM3bj2mok2g"}, {n: "Ep 42", id: "Va2YdCXHtTQ"},
                 {n: "Ep 43", id: "Lh6-LTOloA4"}, {n: "Ep 44", id: "rZF9PdPbNnU"},
             ]
-        },
-        { 
-            title: "Grizzy et les Lemmings", 
-            img: "https://m.media-amazon.com/images/M/MV5BMjM1NzkzNzA3OV5BMl5BanBnXkFtZTgwNjA3OTM0MDI@._V1_.jpg", 
-            episodes: [
-                {n: "Ep 1 - Ours à tout faire", id: "lyXjeJN9lyg"},
-                {n: "Ep 2 - Bébé Grizzy", id: "ESZzyEqfitE"},
-                {n: "Ep 3 - Dans un monde parfait", id: "_I2BfTvHtxc"},
-                {n: "Ep 4 - Lemmings de compétition", id: "O688zN-DbeY"},
-                {n: "Ep 5 - Ours polaire", id: "Xp2l6vGf9iE"},
-                {n: "Ep 6 - Faux départ", id: "Wn6R66I8YfU"},
-                {n: "Ep 7 - Télécommande", id: "0I7t3_P3R_Y"},
-                {n: "Ep 8 - Chocolat à gogo", id: "5N2Qz1U9k3g"},
-                {n: "Ep 9 - Lemmings sur glace", id: "7rA1X8P_f_k"},
-                {n: "Ep 10 - Robot de cuisine", id: "8u_F9vYv_k4"},
-                {n: "Ep 11", id: "dvm-4xaRlFs"}, {n: "Ep 12", id: "kBj6YcfusB4"},
-                {n: "Ep 13", id: "S3_T-8fNf_k"}, {n: "Ep 14", id: "p4_M-8gXf_s"},
-                {n: "Ep 15", id: "q5_O-8hNf_t"}, {n: "Ep 16", id: "r6_P-8iXf_u"},
-                {n: "Ep 17", id: "s7_Q-8jNf_v"}, {n: "Ep 18", id: "t8_R-8kNf_w"},
-                {n: "Ep 19", id: "u9_S-8lNf_x"}, {n: "Ep 20", id: "v0_T-8mNf_y"},
-                {n: "Ep 21", id: "w1_U-8nNf_z"}, {n: "Ep 22", id: "x2_V-8oNf_a"},
-                {n: "Ep 23", id: "y3_W-8pNf_b"}, {n: "Ep 24", id: "z4_X-8qNf_c"},
-                {n: "Ep 25", id: "a5_Y-8rNf_d"}, {n: "Ep 26", id: "b6_Z-8sNf_e"},
-                {n: "Ep 27", id: "c7_A-8tNf_f"}, {n: "Ep 28", id: "d8_B-8uNf_g"},
-                {n: "Ep 29", id: "e9_C-8vNf_h"}, {n: "Ep 30", id: "f0_D-8wNf_i"},
-                {n: "Ep 31", id: "g1_E-8xNf_j"}, {n: "Ep 32", id: "h2_F-8yNf_k"},
-                {n: "Ep 33", id: "i3_G-8zNf_l"}, {n: "Ep 34", id: "j4_H-8ANf_m"},
-                {n: "Ep 35", id: "k5_I-8BNf_n"}, {n: "Ep 36", id: "l6_J-8CNf_o"},
-                {n: "Ep 37", id: "m7_K-8DNf_p"}, {n: "Ep 38", id: "n8_L-8ENf_q"},
-                {n: "Ep 39", id: "o9_M-8FNf_r"}, {n: "Ep 40", id: "p0_N-8GNf_s"},
-                {n: "Ep 41", id: "q1_O-8HNf_t"}, {n: "Ep 42", id: "r2_P-8INf_u"},
-                {n: "Ep 43", id: "s3_Q-8JNf_v"}, {n: "Ep 44", id: "t4_R-8KNf_w"},
-                {n: "Ep 45", id: "u5_S-8LNf_x"}, {n: "Ep 46", id: "v6_T-8MNf_y"},
-                {n: "Ep 47", id: "w7_U-8NNf_z"}, {n: "Ep 48", id: "x8_V-8ONf_a"},
-                {n: "Ep 49", id: "y9_W-8PNf_b"}, {n: "Ep 50", id: "z0_X-8QNf_c"}
-            ]   
-        },
-{ 
-    title: "Scooby-Doo & Cie", 
-    img: "https://m.media-amazon.com/images/M/MV5BMTYyOTExNTA0Nl5BMl5BanBnXkFtZTcwMzY4MTc1Nw@@._V1_.jpg", 
-    episodes: [
-        {n: "Ep 1 - Le Chien Merveilleux", id: "1waFSWBTa4w"},
-        {n: "Ep 2 - Mystère en mer", id: "6-f_Xv8_S9M"},
-        {n: "Ep 3 - Le Fantôme de l'opéra", id: "9_T-8fNf_k1"},
-        {n: "Ep 4 - La créature des neiges", id: "Vn_R-7gFf_m2"},
-        {n: "Ep 5 - Le Chevalier Noir", id: "X8_V-2pQf_n3"},
-        {n: "Ep 6 - Samy et Scooby", id: "Z0_X-4tUf_o4"},
-        {n: "Ep 7", id: "a1_Y-5vWf_p5"}, {n: "Ep 8", id: "b2_Z-6xYf_q6"},
-        {n: "Ep 9", id: "c3_A-7zAf_r7"}, {n: "Ep 10", id: "d4_B-8bCf_s8"},
-        {n: "Ep 11", id: "e5_C-9dEf_t9"}, {n: "Ep 12", id: "f6_D-0gFf_u0"},
-        {n: "Ep 13", id: "g7_E-1hIf_v1"}, {n: "Ep 14", id: "h8_F-2jKf_w2"},
-        {n: "Ep 15", id: "i9_G-3lMf_x3"}, {n: "Ep 16", id: "j0_H-4nOf_y4"},
-        {n: "Ep 17", id: "k1_I-5pQf_z5"}, {n: "Ep 18", id: "l2_J-6rSf_a6"},
-        {n: "Ep 19", id: "m3_K-7tUf_b7"}, {n: "Ep 20", id: "n4_L-8vWf_c8"},
-        {n: "Ep 21", id: "o5_M-9xYf_d9"}, {n: "Ep 22", id: "p6_N-0zAf_e0"},
-        {n: "Ep 23", id: "q7_O-1bCf_f1"}, {n: "Ep 24", id: "r8_P-2dEf_g2"},
-        {n: "Ep 25", id: "s9_Q-3gFf_h3"}, {n: "Ep 26", id: "t0_R-4hIf_i4"},
-        {n: "Ep 27", id: "u1_S-5jKf_j5"}, {n: "Ep 28", id: "v2_T-6lMf_k6"},
-        {n: "Ep 29", id: "w3_U-7nOf_l7"}, {n: "Ep 30", id: "x4_V-8pQf_m8"},
-        {n: "Ep 31", id: "y5_W-9rSf_n9"}, {n: "Ep 32", id: "z6_X-0tUf_o0"},
-        {n: "Ep 33", id: "a7_Y-1vWf_p1"}, {n: "Ep 34", id: "b8_Z-2xYf_q2"},
-        {n: "Ep 35", id: "c9_A-3zAf_r3"}, {n: "Ep 36", id: "d0_B-4bCf_s4"},
-        {n: "Ep 37", id: "e1_C-5dEf_t5"}, {n: "Ep 38", id: "f2_D-6gFf_u6"},
-        {n: "Ep 39", id: "g3_E-7hIf_v7"}, {n: "Ep 40", id: "h4_F-8jKf_w8"},
-        {n: "Ep 41", id: "i5_G-9lMf_x9"}, {n: "Ep 42", id: "j6_H-0nOf_y0"},
-        {n: "Ep 43", id: "k7_I-1pQf_z1"}, {n: "Ep 44", id: "l8_J-2rSf_a2"},
-        {n: "Ep 45", id: "m9_K-3tUf_b3"}, {n: "Ep 46", id: "n0_L-4vWf_c4"},
-        {n: "Ep 47", id: "o1_M-5xYf_d5"}, {n: "Ep 48", id: "p2_N-6zAf_e6"},
-        {n: "Ep 49", id: "q3_O-7bCf_f7"}, {n: "Ep 50", id: "r4_P-8dEf_g8"}
-    ]
-}
+        }
     ];
 
     let favs = JSON.parse(localStorage.getItem('louna_tv_favs')) || [];
+    let rainInterval = null;
+
+    function createFallingItem(symbol) {
+        const item = document.createElement('div');
+        item.className = 'falling-item';
+        item.innerText = symbol;
+        item.style.left = Math.random() * 100 + 'vw';
+        item.style.fontSize = (Math.random() * 20 + 20) + 'px';
+        item.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        document.body.appendChild(item);
+        setTimeout(() => item.remove(), 5000);
+    }
+
+    function startRain(symbol) {
+        if (rainInterval) clearInterval(rainInterval);
+        rainInterval = setInterval(() => createFallingItem(symbol), 200);
+    }
+
+    function stopRain() {
+        if (rainInterval) {
+            clearInterval(rainInterval);
+            rainInterval = null;
+        }
+    }
+
+    function searchCartoon() {
+        const val = document.getElementById('searchBar').value.toLowerCase();
+        const christmasMsg = document.getElementById('christmas-msg');
+        
+        // Reset des effets
+        stopRain();
+        christmasMsg.style.display = 'none';
+
+        // Déclenchement des surprises
+        if (val === 'amour') {
+            startRain('❤️');
+        } else if (val === 'flocon') {
+            startRain('❄️');
+        } else if (val === 'noël' || val === 'noel') {
+            christmasMsg.style.display = 'block';
+        }
+
+        // Filtrage classique
+        const filtered = cartoons.filter(c => c.title.toLowerCase().includes(val));
+        const scrollAll = document.getElementById('scroll-all');
+        scrollAll.innerHTML = '';
+        filtered.forEach(c => {
+            const idx = cartoons.findIndex(item => item.title === c.title);
+            scrollAll.innerHTML += `<div class="cartoon-card">
+                <div class="fav-badge ${favs.includes(c.title) ? 'active' : ''}" onclick="toggleFav('${c.title}')">❤</div>
+                <img src="${c.img}" onclick="openModal(${idx})">
+            </div>`;
+        });
+    }
 
     function render() {
         const scrollAll = document.getElementById('scroll-all');
@@ -364,20 +382,8 @@
             <div class="video-wrapper"><iframe src="${url}" frameborder="0" allowfullscreen></iframe></div>`;
     }
 
-    function closeModal() { document.getElementById('modal-episodes').style.display = 'none'; }
-
-    function searchCartoon() {
-        const val = document.getElementById('searchBar').value.toLowerCase();
-        const filtered = cartoons.filter(c => c.title.toLowerCase().includes(val));
-        const scrollAll = document.getElementById('scroll-all');
-        scrollAll.innerHTML = '';
-        filtered.forEach(c => {
-            const idx = cartoons.findIndex(item => item.title === c.title);
-            scrollAll.innerHTML += `<div class="cartoon-card">
-                <div class="fav-badge ${favs.includes(c.title) ? 'active' : ''}" onclick="toggleFav('${c.title}')">❤</div>
-                <img src="${c.img}" onclick="openModal(${idx})">
-            </div>`;
-        });
+    function closeModal() { 
+        document.getElementById('modal-episodes').style.display = 'none'; 
     }
 
     render();
