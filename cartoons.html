@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Louna TV - Streaming</title>
+    <style>
+        :root {
+            --primary: #1a3a16;
+            --dark: #0d1f0b;
+            --accent: #d4af37;
+            --snow: #f8f9fa;
+        }
+
+        body { 
+            margin: 0;
+            overflow-x: hidden; 
+            height: auto; 
+            padding-bottom: 50px; 
+            background: radial-gradient(circle, var(--primary) 0%, var(--dark) 100%);
+            font-family: 'Segoe UI', sans-serif;
+            color: var(--snow);
+        }
+        
+        .tv-container { padding-top: 20px; width: 100%; }
+
+        header { text-align: center; margin-bottom: 20px; }
+        .title-gold { 
+            color: var(--accent); 
+            text-shadow: 0px 0px 10px rgba(212, 175, 55, 0.5); 
+            margin: 0;
+        }
+
+        .search-container { padding: 0 20px; margin-bottom: 25px; }
+        #searchBar {
+            width: 100%; padding: 14px; border-radius: 30px;
+            border: 2px solid var(--accent); background: rgba(255,255,255,0.05);
+            color: white; text-align: center; outline: none; font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .category-section { margin-bottom: 30px; animation: fadeIn 0.5s ease; }
+        .category-title { padding-left: 20px; color: var(--accent); font-size: 1.2rem; font-weight: bold; margin-bottom: 12px; }
+        .horizontal-scroll { 
+            display: flex; overflow-x: auto; gap: 15px; 
+            padding: 0 20px 15px 20px; scroll-snap-type: x mandatory; 
+            scrollbar-width: none; 
+        }
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+
+        .cartoon-card { 
+            flex: 0 0 140px; scroll-snap-align: start; position: relative; 
+            border-radius: 12px; overflow: hidden; 
+            border: 1px solid rgba(212, 175, 55, 0.3); background: #1a3a16; 
+        }
+        .cartoon-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+        .fav-badge { 
+            position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); 
+            border-radius: 50%; width: 30px; height: 30px; display: flex; 
+            align-items: center; justify-content: center; z-index: 5; color: white; 
+        }
+        .fav-badge.active { color: #ff4d6d; }
+
+        .modal-episodes { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.98); 
+            display: none; flex-direction: column; padding: 20px; z-index: 2000; 
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        .episode-row { 
+            background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); 
+            margin: 8px 0; padding: 15px; border-radius: 12px; color: white; 
+            display: block; font-weight: bold; text-decoration: none; font-size: 0.85rem;
+        }
+
+        .video-wrapper {
+            position: relative; padding-bottom: 56.25%; height: 0; 
+            overflow: hidden; border-radius: 12px; border: 1px solid var(--accent);
+            background: #000;
+        }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        .floating-item { position: fixed; top: -50px; font-size: 2rem; pointer-events: none; z-index: 3000; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="tv-container">
+    <header>
+        <h1 class="title-gold" style="font-size: 2.2rem;">🎬 Louna TV</h1>
+        <a href="index.html" style="color: var(--accent); text-decoration: none; font-size: 0.9rem;">🏠 Retour au Salon</a>
+    </header>
+
+    <div class="search-container">
+        <input type="text" id="searchBar" placeholder="🔍 Chercher un dessin animé..." onkeyup="searchCartoon()">
+    </div>
+
+    <div id="section-favs" class="category-section" style="display:none;">
+        <div class="category-title">⭐ Tes Préférés</div>
+        <div id="scroll-favs" class="horizontal-scroll"></div>
+    </div>
+
+    <div class="category-section">
+        <div class="category-title" id="main-title">🔥 Tous les Dessins Animés</div>
+        <div id="scroll-all" class="horizontal-scroll"></div>
+    </div>
+</div>
+
+<div id="modal-episodes" class="modal-episodes">
+    <div class="modal-header">
+        <h2 id="modal-title" class="title-gold" style="font-size: 1.2rem; max-width: 70%;"></h2>
+        <button onclick="closeModal()" style="background: var(--accent); border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold;">X</button>
+    </div>
+    <div id="modal-content" style="overflow-y: auto; flex-grow: 1;">
+        <div id="modal-list"></div>
+    </div>
+</div>
+
+<script>
+    const cartoons = [
+        { 
+            title: "Souvenirs de Gravity Falls", 
+            img: "gravity.jpg", 
+            episodes: [
+                /* Saison 1 */
+                {n: "S1 E1 - Le Mystère de la cabane", url: "https://video.sibnet.ru/shell.php?videoid=5053901&share=1"},
+                {n: "S1 E2 - La légende du Glouton", url: "https://video.sibnet.ru/shell.php?videoid=5053902&share=1"},
+                {n: "S1 E3 - Le Musée de cire", url: "https://video.sibnet.ru/shell.php?videoid=5053905&share=1"},
+                {n: "S1 E4 - La Main de la voyante", url: "https://video.sibnet.ru/shell.php?videoid=5053907&share=1"},
+                {n: "S1 E5 - Le Gardien du vestiaire", url: "https://video.sibnet.ru/shell.php?videoid=5053908&share=1"},
+                {n: "S1 E6 - Un homme, un vrai", url: "https://video.sibnet.ru/shell.php?videoid=5053910&share=1"},
+                {n: "S1 E7 - Double Dipper", url: "https://video.sibnet.ru/shell.php?videoid=5053911&share=1"},
+                {n: "S1 E8 - Complot pour l'idiotie", url: "https://video.sibnet.ru/shell.php?videoid=5053913&share=1"},
+                {n: "S1 E9 - Le Voyageur du temps", url: "https://video.sibnet.ru/shell.php?videoid=5053915&share=1"},
+                {n: "S1 E10 - La Bagarre de rue", url: "https://video.sibnet.ru/shell.php?videoid=5053916&share=1"},
+                {n: "S1 E11 - Le Petit Dipper", url: "https://video.sibnet.ru/shell.php?videoid=5053917&share=1"},
+                {n: "S1 E12 - Un Été d'Halloween", url: "https://video.sibnet.ru/shell.php?videoid=5053918&share=1"},
+                {n: "S1 E13 - Mabel la patronne", url: "https://video.sibnet.ru/shell.php?videoid=5053919&share=1"},
+                {n: "S1 E14 - Le Puits sans fond", url: "https://video.sibnet.ru/shell.php?videoid=5053920&share=1"},
+                {n: "S1 E15 - Piscine profonde", url: "https://video.sibnet.ru/shell.php?videoid=5053921&share=1"},
+                {n: "S1 E16 - Tapis de salon", url: "https://video.sibnet.ru/shell.php?videoid=5053922&share=1"},
+                {n: "S1 E17 - Un amour de Mabel", url: "https://video.sibnet.ru/shell.php?videoid=5053923&share=1"},
+                {n: "S1 E18 - Dans la forêt", url: "https://video.sibnet.ru/shell.php?videoid=5053924&share=1"},
+                {n: "S1 E19 - À la poursuite de Bill", url: "https://video.sibnet.ru/shell.php?videoid=5053926&share=1"},
+                {n: "S1 E20 - Gideon a gagné", url: "https://video.sibnet.ru/shell.php?videoid=5053928&share=1"},
+                /* Saison 2 */
+                {n: "S2 E1 - La soirée karaoké", url: "https://video.sibnet.ru/shell.php?videoid=5053929&share=1"},
+                {n: "S2 E2 - Dans la soute", url: "https://video.sibnet.ru/shell.php?videoid=5053930&share=1"},
+                {n: "S2 E3 - La guerre du golf", url: "https://video.sibnet.ru/shell.php?videoid=5053932&share=1"},
+                {n: "S2 E4 - Opéra de marionnettes", url: "https://video.sibnet.ru/shell.php?videoid=5053935&share=1"},
+                {n: "S2 E5 - Soos et la vraie fille", url: "https://video.sibnet.ru/shell.php?videoid=5053936&share=1"},
+                {n: "S2 E6 - La petite boutique des horreurs", url: "https://video.sibnet.ru/shell.php?videoid=5053937&share=1"},
+                {n: "S2 E7 - La société de l'oeil aveugle", url: "https://video.sibnet.ru/shell.php?videoid=5053938&share=1"},
+                {n: "S2 E8 - Le jeu de Blendin", url: "https://video.sibnet.ru/shell.php?videoid=5053940&share=1"},
+                {n: "S2 E9 - Le dieu de l'amour", url: "https://video.sibnet.ru/shell.php?videoid=5053941&share=1"},
+                {n: "S2 E10 - Le Manoir Northwest", url: "https://video.sibnet.ru/shell.php?videoid=5053942&share=1"},
+                {n: "S2 E11 - Qui est Oncle Ford ?", url: "https://video.sibnet.ru/shell.php?videoid=5053944&share=1"},
+                {n: "S2 E12 - Histoire de deux Stans", url: "https://video.sibnet.ru/shell.php?videoid=5053945&share=1"},
+                {n: "S2 E13 - Donjons et Donjons", url: "https://video.sibnet.ru/shell.php?videoid=5053946&share=1"},
+                {n: "S2 E14 - Un candidat de poids", url: "https://video.sibnet.ru/shell.php?videoid=5053948&share=1"},
+                {n: "S2 E15 - La dernière Mabelicorne", url: "https://video.sibnet.ru/shell.php?videoid=5053949&share=1"},
+                {n: "S2 E16 - Attractions de l'autoroute", url: "https://video.sibnet.ru/shell.php?videoid=5053950&share=1"},
+                {n: "S2 E17 - Dipper et Mabel contre le futur", url: "https://video.sibnet.ru/shell.php?videoid=5053951&share=1"},
+                {n: "S2 E18 - Weirdmageddon Part 1", url: "https://video.sibnet.ru/shell.php?videoid=5053953&share=1"},
+                {n: "S2 E19 - Weirdmageddon Part 2", url: "https://video.sibnet.ru/shell.php?videoid=5053958&share=1"},
+                {n: "S2 E20 - Weirdmageddon Part 3", url: "https://video.sibnet.ru/shell.php?videoid=5053959&share=1"}
+            ]
+        },
+        { 
+            title: "MAGIC", 
+            img: "magic.jpg", 
+            episodes: [
+                {n: "Ep 1 - Trous de mémoire", id: "pciWnFgllrI"},
+                {n: "Ep 2 - Bonjour la famille !", id: "kKx9eZynKPk"},
+                {n: "Ep 3 - Lessivés !", id: "zkLkPKBKzds"},
+                {n: "Ep 4 - Le code de conduite", id: "4McS25I6_Y"},
+                {n: "Ep 5 - Un ugre au régime", id: "MShtoa97MoI"},
+                {n: "Ep 6 - La confiance règne", id: "_mv6QTCR9to"},
+                {n: "Ep 7 - Le ventriloque", id: "fJrLooFfrJQ"},
+                {n: "Ep 8 - Pour le meilleur ou pour le pire", id: "PHg5fN4QVa0"},
+                {n: "Ep 9 - Conte à rebours", id: "MbpPkPE91G4"},
+                {n: "Ep 10 - La petite souris", id: "pDAy3fn79D8"},
+                {n: "Ep 11 - Monseigneur", id: "m3-j-O6Y6ck"},
+                {n: "Ep 12 - L'ogre qui voulait être Père Noël", id: "4IpvGi2cwVg"},
+                {n: "Ep 13 - Une vie de chien", id: "GLgAgn2gM98"},
+                {n: "Ep 14 - Les envahisseurs", id: "EDlaW4anSuc"},
+                {n: "Ep 15 - La potion de vérité", id: "blQn1Vv3pbM"},
+                {n: "Ep 16 - Quelqu'un sur qui compter", id: "q0L6Nxb_lXQ"},
+                {n: "Ep 17 - Le grand déballage", id: "T_-7VZjcWc0"},
+                {n: "Ep 18 - Le nouveau", id: "lnhuJS8HfY8"},
+                {n: "Ep 19 - Un ogre à la maison", id: "cRndoc23Ycs"},
+                {n: "Ep 20 - La magie ne fait pas le bonheur", id: "w6whYVdgduE"},
+                {n: "Ep 21 - Pas de cadeau pour les fées", id: "7pTzgwV9LPo"},
+                {n: "Ep 22 - Un monde de fées", id: "QKmDXlDPGyk"},
+                {n: "Ep 23 - La bête noire", id: "oTMwt4UJJu4"},
+                {n: "Ep 24 - Une fée au travail", id: "_i9Nh3JDHYc"},
+                {n: "Ep 25 - Le prince charmant", id: "H1hpOWfnGK8"},
+                {n: "Ep 26 - L'école des fées", id: "sQa-o7akCys"},
+                {n: "Ep 27 - Un amour d'ogre", id: "eyf-jeRDkjw"},
+                {n: "Ep 28 - La cantine de l'école", id: "plxEvIXy1q0"},
+                {n: "Ep 29 - Drôle de babysitting", id: "h6Nkfx49ndw"},
+                {n: "Ep 30 - Un jeu d'enfant", id: "VjTPvrLcibY"},
+                {n: "Ep 31 - Le miroir magique", id: "45h3nL-EL58"},
+                {n: "Ep 32 - La visite de la tante", id: "RtHJGT9bRMk"},
+                {n: "Ep 33 - Le génie de la lampe", id: "ltdH99hH0NA"},
+                {n: "Ep 34 - Un ugre dans le ciel", id: "zOD-wsInHaU"},
+                {n: "Ep 35 - Le bal masqué", id: "cNI-NUTHC5w"},
+                {n: "Ep 36 - Une baguette pour deux", id: "RqDUVX2FX4Q"},
+                {n: "Ep 37 - Le trésor caché", id: "BA94I9uA2_g"},
+                {n: "Ep 38 - La guerre des fées", id: "5W6DrBlvMjs"},
+                {n: "Ep 39 - Un ugre à l'école", id: "1rnRz94nLXE"},
+                {n: "Ep 40 - Le secret de Tom", id: "1BmdUKwuVA4"},
+                {n: "Ep 41 - La fée du logis", id: "VmM4U4woR5k"},
+                {n: "Ep 42 - Un prince pas si charmant", id: "5GfwTYEdnoY"},
+                {n: "Ep 43 - Le retour de Merlin", id: "_sPp5_Ls5Mc"},
+                {n: "Ep 44 - Une baguette trop puissante", id: "IOojRFBxd9g"},
+                {n: "Ep 45 - Le vœu de Tom", id: "NdzKLWzbyf8"},
+                {n: "Ep 46 - La révolte des objets", id: "ICPSx_at4j0"},
+                {n: "Ep 47 - Le sortilège du sommeil", id: "rARCAwxTW9Q"},
+                {n: "Ep 48 - Le grand saut", id: "bJCgnBZR2ZM"},
+                {n: "Ep 49 - La disparition de Willow", id: "P1uxarbFQ1M"},
+                {n: "Ep 50 - Le retour aux sources", id: "uyoqP09o93s"}
+            ]
+            
+        },
+        { 
+            title: "Zip Zip", 
+            img: "rekkit.jpg", 
+            episodes: [
+                {n: "Ep 1", id: "pyi0Za3T7nY"}, {n: "Ep 2", id: "ROJBN6cR5Cw"}, {n: "Ep 3", id: "K0O0KIfycIk"},
+                {n: "Ep 4", id: "7Hg3dqaudPY"}, {n: "Ep 5", id: "ZLd4UU8sLMw"}, {n: "Ep 6", id: "veNtrZFAQZ4"},
+                {n: "Ep 7", id: "ektSPT6V9ug"}, {n: "Ep 8", id: "w9iY5t8C-YI"}, {n: "Ep 9", id: "nUqCsEdltDA"},
+                {n: "Ep 10", id: "kocnwwlMPG4"}, {n: "Ep 11", id: "ykZBbppmHyQ"}, {n: "Ep 12", id: "X4ezlfOOzbo"},
+                {n: "Ep 13", id: "8924g-Z2nNU"}, {n: "Ep 14", id: "F2oApdqVPYw"}, {n: "Ep 15", id: "Y9jjCgsYiss"},
+                {n: "Ep 16", id: "95vPBGo6jBY"}, {n: "Ep 17", id: "93T5cHG9tvg"}, {n: "Ep 18", id: "1KpJj3ItOuc"},
+                {n: "Ep 19", id: "uDA4MwrwhSg"}, {n: "Ep 20", id: "me1ZRJJYFrc"}, {n: "Ep 21", id: "s8jLnd0uF2s"},
+                {n: "Ep 22", id: "1px1XvbQNSA"}, {n: "Ep 23", id: "Z5VZgNO8VSo"}, {n: "Ep 24", id: "VDwi2hXymiQ"},
+                {n: "Ep 25", id: "5iEXpSDBj_c"}, {n: "Ep 26", id: "Qf1Yqql6REw"}, {n: "Ep 27", id: "tcGKPfgDmas"},
+                {n: "Ep 28", id: "SazkDMVSBzM"}, {n: "Ep 29", id: "DTLJ869OXho"}, {n: "Ep 30", id: "gzFBRpMMCdU"},
+                {n: "Ep 31", id: "bKR_ciaFTWc"}, {n: "Ep 32", id: "X24vcGqj8J0"}, {n: "Ep 33", id: "D53DSwhI2VQ"},
+                {n: "Ep 34", id: "3t1TM7uMUC0"}, {n: "Ep 35", id: "gTkuZjz9vuY"}, {n: "Ep 36", id: "ARsUpOLZXd4"},
+                {n: "Ep 37", id: "OP-cnN3Pe2Q"}, {n: "Ep 38", id: "aUaiaspk6Qw"}, {n: "Ep 39", id: "CRucilskMlk"},
+                {n: "Ep 40", id: "QeOXU9Hlqgg"}, {n: "Ep 41", id: "VM3bj2mok2g"}, {n: "Ep 42", id: "Va2YdCXHtTQ"},
+                {n: "Ep 43", id: "Lh6-LTOloA4"}, {n: "Ep 44", id: "rZF9PdPbNnU"},
+            ]
+        },
+        { 
+            title: "Grizzy et les Lemmings", 
+            img: "https://m.media-amazon.com/images/M/MV5BMjM1NzkzNzA3OV5BMl5BanBnXkFtZTgwNjA3OTM0MDI@._V1_.jpg", 
+            episodes: [
+                {n: "Ep 1 - Ours à tout faire", id: "lyXjeJN9lyg"},
+                {n: "Ep 2 - Bébé Grizzy", id: "ESZzyEqfitE"},
+                {n: "Ep 3 - Dans un monde parfait", id: "_I2BfTvHtxc"},
+                {n: "Ep 4 - Lemmings de compétition", id: "O688zN-DbeY"},
+                {n: "Ep 5 - Ours polaire", id: "Xp2l6vGf9iE"},
+                {n: "Ep 6 - Faux départ", id: "Wn6R66I8YfU"},
+                {n: "Ep 7 - Télécommande", id: "0I7t3_P3R_Y"},
+                {n: "Ep 8 - Chocolat à gogo", id: "5N2Qz1U9k3g"},
+                {n: "Ep 9 - Lemmings sur glace", id: "7rA1X8P_f_k"},
+                {n: "Ep 10 - Robot de cuisine", id: "8u_F9vYv_k4"},
+                {n: "Ep 11", id: "dvm-4xaRlFs"}, {n: "Ep 12", id: "kBj6YcfusB4"},
+                {n: "Ep 13", id: "S3_T-8fNf_k"}, {n: "Ep 14", id: "p4_M-8gXf_s"},
+                {n: "Ep 15", id: "q5_O-8hNf_t"}, {n: "Ep 16", id: "r6_P-8iXf_u"},
+                {n: "Ep 17", id: "s7_Q-8jNf_v"}, {n: "Ep 18", id: "t8_R-8kNf_w"},
+                {n: "Ep 19", id: "u9_S-8lNf_x"}, {n: "Ep 20", id: "v0_T-8mNf_y"},
+                {n: "Ep 21", id: "w1_U-8nNf_z"}, {n: "Ep 22", id: "x2_V-8oNf_a"},
+                {n: "Ep 23", id: "y3_W-8pNf_b"}, {n: "Ep 24", id: "z4_X-8qNf_c"},
+                {n: "Ep 25", id: "a5_Y-8rNf_d"}, {n: "Ep 26", id: "b6_Z-8sNf_e"},
+                {n: "Ep 27", id: "c7_A-8tNf_f"}, {n: "Ep 28", id: "d8_B-8uNf_g"},
+                {n: "Ep 29", id: "e9_C-8vNf_h"}, {n: "Ep 30", id: "f0_D-8wNf_i"},
+                {n: "Ep 31", id: "g1_E-8xNf_j"}, {n: "Ep 32", id: "h2_F-8yNf_k"},
+                {n: "Ep 33", id: "i3_G-8zNf_l"}, {n: "Ep 34", id: "j4_H-8ANf_m"},
+                {n: "Ep 35", id: "k5_I-8BNf_n"}, {n: "Ep 36", id: "l6_J-8CNf_o"},
+                {n: "Ep 37", id: "m7_K-8DNf_p"}, {n: "Ep 38", id: "n8_L-8ENf_q"},
+                {n: "Ep 39", id: "o9_M-8FNf_r"}, {n: "Ep 40", id: "p0_N-8GNf_s"},
+                {n: "Ep 41", id: "q1_O-8HNf_t"}, {n: "Ep 42", id: "r2_P-8INf_u"},
+                {n: "Ep 43", id: "s3_Q-8JNf_v"}, {n: "Ep 44", id: "t4_R-8KNf_w"},
+                {n: "Ep 45", id: "u5_S-8LNf_x"}, {n: "Ep 46", id: "v6_T-8MNf_y"},
+                {n: "Ep 47", id: "w7_U-8NNf_z"}, {n: "Ep 48", id: "x8_V-8ONf_a"},
+                {n: "Ep 49", id: "y9_W-8PNf_b"}, {n: "Ep 50", id: "z0_X-8QNf_c"}
+            ]   
+        },
+{ 
+    title: "Scooby-Doo & Cie", 
+    img: "https://m.media-amazon.com/images/M/MV5BMTYyOTExNTA0Nl5BMl5BanBnXkFtZTcwMzY4MTc1Nw@@._V1_.jpg", 
+    episodes: [
+        {n: "Ep 1 - Le Chien Merveilleux", id: "1waFSWBTa4w"},
+        {n: "Ep 2 - Mystère en mer", id: "6-f_Xv8_S9M"},
+        {n: "Ep 3 - Le Fantôme de l'opéra", id: "9_T-8fNf_k1"},
+        {n: "Ep 4 - La créature des neiges", id: "Vn_R-7gFf_m2"},
+        {n: "Ep 5 - Le Chevalier Noir", id: "X8_V-2pQf_n3"},
+        {n: "Ep 6 - Samy et Scooby", id: "Z0_X-4tUf_o4"},
+        {n: "Ep 7", id: "a1_Y-5vWf_p5"}, {n: "Ep 8", id: "b2_Z-6xYf_q6"},
+        {n: "Ep 9", id: "c3_A-7zAf_r7"}, {n: "Ep 10", id: "d4_B-8bCf_s8"},
+        {n: "Ep 11", id: "e5_C-9dEf_t9"}, {n: "Ep 12", id: "f6_D-0gFf_u0"},
+        {n: "Ep 13", id: "g7_E-1hIf_v1"}, {n: "Ep 14", id: "h8_F-2jKf_w2"},
+        {n: "Ep 15", id: "i9_G-3lMf_x3"}, {n: "Ep 16", id: "j0_H-4nOf_y4"},
+        {n: "Ep 17", id: "k1_I-5pQf_z5"}, {n: "Ep 18", id: "l2_J-6rSf_a6"},
+        {n: "Ep 19", id: "m3_K-7tUf_b7"}, {n: "Ep 20", id: "n4_L-8vWf_c8"},
+        {n: "Ep 21", id: "o5_M-9xYf_d9"}, {n: "Ep 22", id: "p6_N-0zAf_e0"},
+        {n: "Ep 23", id: "q7_O-1bCf_f1"}, {n: "Ep 24", id: "r8_P-2dEf_g2"},
+        {n: "Ep 25", id: "s9_Q-3gFf_h3"}, {n: "Ep 26", id: "t0_R-4hIf_i4"},
+        {n: "Ep 27", id: "u1_S-5jKf_j5"}, {n: "Ep 28", id: "v2_T-6lMf_k6"},
+        {n: "Ep 29", id: "w3_U-7nOf_l7"}, {n: "Ep 30", id: "x4_V-8pQf_m8"},
+        {n: "Ep 31", id: "y5_W-9rSf_n9"}, {n: "Ep 32", id: "z6_X-0tUf_o0"},
+        {n: "Ep 33", id: "a7_Y-1vWf_p1"}, {n: "Ep 34", id: "b8_Z-2xYf_q2"},
+        {n: "Ep 35", id: "c9_A-3zAf_r3"}, {n: "Ep 36", id: "d0_B-4bCf_s4"},
+        {n: "Ep 37", id: "e1_C-5dEf_t5"}, {n: "Ep 38", id: "f2_D-6gFf_u6"},
+        {n: "Ep 39", id: "g3_E-7hIf_v7"}, {n: "Ep 40", id: "h4_F-8jKf_w8"},
+        {n: "Ep 41", id: "i5_G-9lMf_x9"}, {n: "Ep 42", id: "j6_H-0nOf_y0"},
+        {n: "Ep 43", id: "k7_I-1pQf_z1"}, {n: "Ep 44", id: "l8_J-2rSf_a2"},
+        {n: "Ep 45", id: "m9_K-3tUf_b3"}, {n: "Ep 46", id: "n0_L-4vWf_c4"},
+        {n: "Ep 47", id: "o1_M-5xYf_d5"}, {n: "Ep 48", id: "p2_N-6zAf_e6"},
+        {n: "Ep 49", id: "q3_O-7bCf_f7"}, {n: "Ep 50", id: "r4_P-8dEf_g8"}
+    ]
+}
+    ];
+
+    let favs = JSON.parse(localStorage.getItem('louna_tv_favs')) || [];
+
+    function render() {
+        const scrollAll = document.getElementById('scroll-all');
+        const scrollFavs = document.getElementById('scroll-favs');
+        const sectionFavs = document.getElementById('section-favs');
+        scrollAll.innerHTML = ''; scrollFavs.innerHTML = '';
+
+        cartoons.forEach((c, i) => {
+            const isFav = favs.includes(c.title);
+            const html = `<div class="cartoon-card">
+                    <div class="fav-badge ${isFav ? 'active' : ''}" onclick="toggleFav('${c.title}')">❤</div>
+                    <img src="${c.img}" onclick="openModal(${i})">
+                </div>`;
+            scrollAll.innerHTML += html;
+            if(isFav) scrollFavs.innerHTML += html;
+        });
+        sectionFavs.style.display = favs.length > 0 ? 'block' : 'none';
+    }
+
+    function toggleFav(title) {
+        favs = favs.includes(title) ? favs.filter(t => t !== title) : [...favs, title];
+        localStorage.setItem('louna_tv_favs', JSON.stringify(favs));
+        render();
+    }
+
+    function openModal(i) {
+        const c = cartoons[i];
+        document.getElementById('modal-title').innerText = c.title;
+        const list = document.getElementById('modal-list');
+        list.innerHTML = c.episodes.map(ep => {
+            const videoUrl = ep.id ? `https://www.youtube.com/embed/${ep.id}?autoplay=1` : ep.url;
+            return `<div class="episode-row" onclick="playVideo('${videoUrl}', '${ep.n.replace(/'/g, "\\'")}', ${i})">▶ ${ep.n}</div>`;
+        }).join('');
+        document.getElementById('modal-episodes').style.display = 'flex';
+    }
+
+    function playVideo(url, title, index) {
+        document.getElementById('modal-list').innerHTML = `
+            <div style="text-align:center; margin-bottom:15px;">
+                <button onclick="openModal(${index})" style="background:var(--accent); border:none; padding:10px 20px; border-radius:20px; font-weight:bold;">⬅ Retour</button>
+                <p style="margin-top:10px; font-size:0.9rem;">${title}</p>
+            </div>
+            <div class="video-wrapper"><iframe src="${url}" frameborder="0" allowfullscreen></iframe></div>`;
+    }
+
+    function closeModal() { document.getElementById('modal-episodes').style.display = 'none'; }
+
+    function searchCartoon() {
+        const val = document.getElementById('searchBar').value.toLowerCase();
+        const filtered = cartoons.filter(c => c.title.toLowerCase().includes(val));
+        const scrollAll = document.getElementById('scroll-all');
+        scrollAll.innerHTML = '';
+        filtered.forEach(c => {
+            const idx = cartoons.findIndex(item => item.title === c.title);
+            scrollAll.innerHTML += `<div class="cartoon-card">
+                <div class="fav-badge ${favs.includes(c.title) ? 'active' : ''}" onclick="toggleFav('${c.title}')">❤</div>
+                <img src="${c.img}" onclick="openModal(${idx})">
+            </div>`;
+        });
+    }
+
+    render();
+</script>
+</body>
+</html>
