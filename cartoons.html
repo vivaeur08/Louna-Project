@@ -10,142 +10,321 @@
             --dark: #0d1f0b;
             --accent: #d4af37;
             --snow: #f8f9fa;
+            --shadow: rgba(0, 0, 0, 0.8);
         }
 
         body { 
             margin: 0;
-            overflow-x: hidden; 
-            height: auto; 
-            padding-bottom: 50px; 
-            background: radial-gradient(circle, var(--primary) 0%, var(--dark) 100%);
-            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--dark);
+            background: linear-gradient(to bottom, var(--primary), var(--dark));
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             color: var(--snow);
-        }
-        
-        .tv-container { padding-top: 20px; width: 100%; }
-
-        header { text-align: center; margin-bottom: 20px; }
-        .title-gold { 
-            color: var(--accent); 
-            text-shadow: 0px 0px 10px rgba(212, 175, 55, 0.5); 
-            margin: 0;
+            overflow-x: hidden;
+            padding-bottom: 50px;
         }
 
-        .search-container { padding: 0 20px; margin-bottom: 25px; }
-        #searchBar {
-            width: 100%; padding: 14px; border-radius: 30px;
-            border: 2px solid var(--accent); background: rgba(255,255,255,0.05);
-            color: white; text-align: center; outline: none; font-size: 1rem;
+        /* --- NAVIGATION --- */
+        .nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.5s;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
             box-sizing: border-box;
         }
-
-        .category-section { margin-bottom: 30px; animation: fadeIn 0.5s ease; }
-        .category-title { padding-left: 20px; color: var(--accent); font-size: 1.2rem; font-weight: bold; margin-bottom: 12px; }
-        .horizontal-scroll { 
-            display: flex; overflow-x: auto; gap: 15px; 
-            padding: 0 20px 15px 20px; scroll-snap-type: x mandatory; 
-            scrollbar-width: none; 
+        .nav.black {
+            background-color: var(--dark);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
         }
-        .horizontal-scroll::-webkit-scrollbar { display: none; }
-
-        .cartoon-card { 
-            flex: 0 0 140px; scroll-snap-align: start; position: relative; 
-            border-radius: 12px; overflow: hidden; 
-            border: 1px solid rgba(212, 175, 55, 0.3); background: #1a3a16; 
-        }
-        .cartoon-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
-        .fav-badge { 
-            position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); 
-            border-radius: 50%; width: 30px; height: 30px; display: flex; 
-            align-items: center; justify-content: center; z-index: 5; color: white; 
-        }
-        .fav-badge.active { color: #ff4d6d; }
-
-        /* Styles pour les effets de pluie (Coeurs/Flocons) */
-        .falling-item {
-            position: fixed;
-            top: -50px;
-            z-index: 9999;
-            pointer-events: none;
-            animation: fall linear forwards;
+        .nav-logo {
+            color: var(--accent);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0px 0px 10px rgba(212, 175, 55, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
         }
 
-        @keyframes fall {
-            to {
-                transform: translateY(110vh) rotate(360deg);
-            }
+        /* Barre de recherche style Netflix */
+        .search-box {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
         }
-
-        /* Style Message Noël */
-        #christmas-msg {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 0, 0, 0.9);
+        .search-box label {
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+        .search-box input {
+            background: transparent;
+            border: none;
             color: white;
-            padding: 30px;
-            border-radius: 20px;
-            border: 5px solid var(--accent);
-            text-align: center;
-            z-index: 10000;
-            font-size: 2rem;
-            display: none;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            width: 80%;
+            padding: 5px;
+            outline: none;
+            width: 150px;
+            font-size: 0.9rem;
         }
 
+        /* --- BANNIÈRE (HERO) --- */
+        .banner {
+            height: 60vh;
+            background-size: cover;
+            background-position: center center;
+            position: relative;
+            color: white;
+            object-fit: contain;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .banner--fadeBottom {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 10rem;
+            background-image: linear-gradient(180deg, transparent, var(--dark));
+        }
+        .banner__contents {
+            margin-left: 30px;
+            padding-top: 80px;
+            height: 190px;
+            z-index: 10;
+        }
+        .banner__title {
+            font-size: 3rem;
+            font-weight: 800;
+            padding-bottom: 0.3rem;
+            color: var(--accent);
+            text-shadow: 2px 2px 4px black;
+        }
+        .banner__description {
+            width: 45rem;
+            line-height: 1.3;
+            padding-top: 1rem;
+            font-size: 1rem;
+            max-width: 360px;
+            height: 80px;
+            text-shadow: 1px 1px 2px black;
+        }
+        .banner__button {
+            cursor: pointer;
+            color: #fff;
+            outline: none;
+            border: none;
+            font-weight: 700;
+            border-radius: 0.2vw;
+            padding-left: 2rem;
+            padding-right: 2rem;
+            margin-right: 1rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            background-color: rgba(51, 51, 51, 0.8);
+            transition: all 0.2s;
+        }
+        .banner__button:hover {
+            color: #000;
+            background-color: var(--accent);
+        }
+        .btn-play { background-color: var(--accent); color: black; }
+
+        /* --- ROWS (LIGNES DE FILMS) --- */
+        .row {
+            margin-left: 20px;
+            margin-top: 20px;
+        }
+        .row__title {
+            color: var(--snow);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+        }
+        .row__posters {
+            display: flex;
+            overflow-y: hidden;
+            overflow-x: scroll;
+            padding: 20px 0 20px 0;
+            gap: 15px;
+        }
+        .row__posters::-webkit-scrollbar { display: none; }
+        
+        .row__poster {
+            max-height: 200px;
+            object-fit: cover;
+            aspect-ratio: 2/3;
+            border-radius: 6px;
+            width: 100%;
+            transition: transform 450ms;
+            margin-right: 10px;
+            cursor: pointer;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        .row__poster:hover {
+            transform: scale(1.08);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+        
+        .poster-container {
+            position: relative;
+            flex: 0 0 auto;
+        }
+        .fav-badge { 
+            position: absolute; top: 5px; right: 15px; background: rgba(0,0,0,0.6); 
+            border-radius: 50%; width: 25px; height: 25px; display: flex; 
+            align-items: center; justify-content: center; z-index: 5; color: rgba(255,255,255,0.5); 
+            cursor: pointer; font-size: 0.8rem; border: 1px solid transparent;
+        }
+        .fav-badge.active { color: #ff4d6d; border-color: #ff4d6d; background: rgba(0,0,0,0.8); }
+
+
+        /* --- MODAL --- */
         .modal-episodes { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.98); 
+            position: fixed; inset: 0; background: rgba(13, 31, 11, 0.95); 
             display: none; flex-direction: column; padding: 20px; z-index: 2000; 
+            backdrop-filter: blur(5px);
         }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
         .episode-row { 
-            background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); 
-            margin: 8px 0; padding: 15px; border-radius: 12px; color: white; 
-            display: block; font-weight: bold; text-decoration: none; font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.05); 
+            border-left: 3px solid transparent;
+            margin: 8px 0; padding: 15px; border-radius: 4px; color: white; 
+            display: flex; align-items: center; cursor: pointer; transition: 0.3s;
         }
+        .episode-row:hover { background: rgba(212, 175, 55, 0.2); border-left: 3px solid var(--accent); }
 
         .video-wrapper {
             position: relative; padding-bottom: 56.25%; height: 0; 
-            overflow: hidden; border-radius: 12px; border: 1px solid var(--accent);
-            background: #000;
+            overflow: hidden; border-radius: 8px; border: 1px solid var(--accent);
+            background: #000; box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            z-index: 1; /* S'assure que la vidéo reste derrière les controles */
         }
         .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        /* Bouton Retour personnalisé dans le lecteur */
+        .back-btn-container {
+            text-align: center; 
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 100; /* Très important pour être au dessus de tout */
+        }
+        .back-btn {
+            background: var(--accent); 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            cursor: pointer;
+            font-size: 1rem;
+            color: #0d1f0b;
+            transition: transform 0.2s;
+        }
+        .back-btn:hover {
+            transform: scale(1.05);
+            background: white;
+        }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* --- EFFECTS & EASTER EGGS --- */
+        .falling-item {
+            position: fixed; top: -50px; z-index: 9999; pointer-events: none;
+            animation: fall linear forwards;
+        }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        #christmas-msg {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(26, 58, 22, 0.95); color: var(--accent);
+            padding: 40px; border-radius: 10px; border: 2px solid var(--accent);
+            text-align: center; z-index: 10000; font-size: 2rem; display: none;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .banner { height: 50vh; }
+            .banner__title { font-size: 2rem; }
+            .banner__description { display: none; }
+            .row__poster { max-height: 160px; }
+        }
+
+        .btn-watch {
+    display: inline-block;
+    padding: 15px 25px;
+    background-color: #ff4757;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-watch:hover {
+    background-color: #ff6b81;
+    transform: scale(1.05);
+}
     </style>
 </head>
 <body>
 
 <div id="christmas-msg">🎄 Joyeux Noël Mon amour 🎁</div>
 
-<div class="tv-container">
-    <header>
-        <h1 class="title-gold" style="font-size: 2.2rem;">🎬 Louna TV</h1>
-        <a href="index.html" style="color: var(--accent); text-decoration: none; font-size: 0.9rem;">🏠 Retour au Salon</a>
-    </header>
+<div class="nav" id="nav">
+    <div class="nav-logo" onclick="window.location.reload()">LOUNA TV</div>
+    <div class="search-box">
+        <label for="searchBar">🔍</label>
+        <input type="text" id="searchBar" placeholder="Titres, dessins..." onkeyup="searchCartoon()">
+    </div>
+</div>
 
-    <div class="search-container">
-        <input type="text" id="searchBar" placeholder="🔍 Chercher un dessin animé..." onkeyup="searchCartoon()">
+<header class="banner" id="hero-banner">
+    <div class="banner__contents">
+        <h1 class="banner__title" id="hero-title">Chargement...</h1>
+        <div class="banner__buttons">
+            <button class="banner__button btn-play" onclick="playHero()">Lecture</button>
+            <button class="banner__button" onclick="infoHero()">Plus d'infos</button>
+        </div>
+        <h1 class="banner__description">
+            Regarde tes dessins animés préférés, choisis spécialement pour toi.
+        </h1>
+    </div>
+    <div class="banner--fadeBottom"></div>
+</header>
+
+<div class="tv-container" style="padding-top: 10px;">
+
+    <div id="section-favs" class="row" style="display:none;">
+        <h2 class="row__title">⭐ Ma Liste</h2>
+        <div id="scroll-favs" class="row__posters"></div>
     </div>
 
-    <div id="section-favs" class="category-section" style="display:none;">
-        <div class="category-title">⭐ Tes Préférés</div>
-        <div id="scroll-favs" class="horizontal-scroll"></div>
+    <div class="row">
+        <h2 class="row__title" id="main-title">🔥 Tendances Actuelles</h2>
+        <div id="scroll-all" class="row__posters"></div>
+    </div>
+    
+    <div class="row" style="padding-bottom: 40px;">
+        <h2 class="row__title">📺 À revoir encore et encore</h2>
+        <div id="scroll-replay" class="row__posters"></div>
     </div>
 
-    <div class="category-section">
-        <div class="category-title" id="main-title">🔥 Tous les Dessins Animés</div>
-        <div id="scroll-all" class="horizontal-scroll"></div>
-    </div>
 </div>
 
 <div id="modal-episodes" class="modal-episodes">
     <div class="modal-header">
-        <h2 id="modal-title" class="title-gold" style="font-size: 1.2rem; max-width: 70%;"></h2>
-        <button onclick="closeModal()" style="background: var(--accent); border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold;">X</button>
+        <h2 id="modal-title" style="color: var(--accent); font-size: 1.5rem; margin:0;"></h2>
+        <button onclick="closeModal()" style="background: rgba(255,255,255,0.2); border: none; padding: 8px 15px; border-radius: 50%; color: white; cursor:pointer;">X</button>
     </div>
     <div id="modal-content" style="overflow-y: auto; flex-grow: 1;">
         <div id="modal-list"></div>
@@ -157,6 +336,7 @@
         { 
             title: "Souvenirs de Gravity Falls", 
             img: "gravity.jpg", 
+            desc: "Dipper et Mabel Pines passent leur été chez leur grand-oncle Stan à Gravity Falls, une ville mystérieuse.",
             episodes: [
                 /* Saison 1 */
                 {n: "S1 E1 - Le Mystère de la cabane", url: "https://video.sibnet.ru/shell.php?videoid=5053901&share=1"},
@@ -204,7 +384,8 @@
         },
         { 
             title: "MAGIC", 
-            img: "magic.jpg", 
+            img: "magic.jpg",
+            desc: "Un ogre, une fée et leurs enfants magiques tentent de vivre comme des humains normaux.",
             episodes: [
                 {n: "Ep 1 - Trous de mémoire", id: "pciWnFgllrI"},
                 {n: "Ep 2 - Bonjour la famille !", id: "kKx9eZynKPk"},
@@ -257,11 +438,11 @@
                 {n: "Ep 49 - La disparition de Willow", id: "P1uxarbFQ1M"},
                 {n: "Ep 50 - Le retour aux sources", id: "uyoqP09o93s"}
             ]
-            
         },
         { 
             title: "Zip Zip", 
-            img: "rekkit.jpg", 
+            img: "rekkit.jpg",
+            desc: "Des animaux de la forêt se déguisent en animaux domestiques pour profiter de la vie urbaine.",
             episodes: [
                 {n: "Ep 1", id: "pyi0Za3T7nY"}, {n: "Ep 2", id: "ROJBN6cR5Cw"}, {n: "Ep 3", id: "K0O0KIfycIk"},
                 {n: "Ep 4", id: "7Hg3dqaudPY"}, {n: "Ep 5", id: "ZLd4UU8sLMw"}, {n: "Ep 6", id: "veNtrZFAQZ4"},
@@ -279,11 +460,152 @@
                 {n: "Ep 40", id: "QeOXU9Hlqgg"}, {n: "Ep 41", id: "VM3bj2mok2g"}, {n: "Ep 42", id: "Va2YdCXHtTQ"},
                 {n: "Ep 43", id: "Lh6-LTOloA4"}, {n: "Ep 44", id: "rZF9PdPbNnU"},
             ]
-        }
+        },
+        { 
+            title: "Princesse Sofia", 
+            img: "sofia.jpg", 
+            desc: "Sofia, une petite fille ordinaire, devient une princesse du jour au lendemain. Elle apprend que le secret pour être une vraie princesse vient du cœur.",
+            episodes: [
+                {n: "L'examen de princesse", id: "0LlKU6XEpSs"},
+                {n: "L'hymne royal", id: "pVTU3j-IB88"},
+                {n: "Le goûter royal", id: "lwGTyINJbcc"},
+                {n: "Le sifflet magique", id: "yS6Cl7q3g1Y"},
+                {n: "L'amulette et l'hymne", id: "2CYxb7ZUJbY"},
+                {n: "La ballade en bateau magique", id: "dOukwG8r2KE"},
+                {n: "L'amulette d'Avalor", id: "1FWZoljuCsw"},
+                {n: "Le pique-nique des Tri-Nations", id: "54gWZxX3ag0"},
+                {n: "L'école des princesses", id: "HH-dJfd1H3c"},
+                {n: "Raiponce et Ambre aident Sofia", id: "iJ7iYQ8bf24"},
+                {n: "Chanson d'Ambre et Sofia", id: "7lLCauUtNjI"},
+                {n: "Ariel aide Sofia", id: "k6nKVwA_Uuw"},
+                {n: "La leçon de danse", id: "hdZQVgY9mio"},
+                {n: "Ma propre voie (Chanson)", id: "yYijz8QiT_4"},
+                {n: "Le petit déjeuner de Clover", id: "8UAW0YuO4o8"},
+                {n: "L'amulette et le sortilège", id: "53CI27rOBl8"},
+                {n: "La couronne de fleurs", id: "zgKRG80gRcE"},
+                {n: "Sofia rencontre Raiponce", id: "jA9xvag2qWU"},
+                {n: "Le chevalier et la princesse", id: "Quco3gSukfs"},
+                {n: "Le festival du printemps", id: "dFPIkCSQYFU"},
+                {n: "L'aventure de Clover", id: "1ykqli1S7AU"},
+                {n: "Le sortilège de Cédric", id: "sP9ZukezISk"},
+                {n: "La princesse papillon", id: "L1raaF5Skjg"},
+                {n: "Les tableaux magiques", id: "G_SG7nClB9c"},
+                {n: "Une fête royale", id: "nuQoWQzJ3To"},
+                {n: "La malédiction de l'amulette", id: "K7m-qWALYJI"},
+                {n: "Le test de courage", id: "Cmd5y2iFYDI"},
+                {n: "Au royaume des sirènes", id: "9VBTRfkY2WM"},
+                {n: "Le secret de l'amulette", id: "DHP57GyQ_mY"},
+                {n: "La chanson d'Olaf", id: "Jsk7d5umzhE"},
+                {n: "Sofia et Jasmine", id: "IzWgHUHqVGo"},
+                {n: "Le palais flottant", id: "42QV9_JRfPo"},
+                {n: "La leçon de Mulan", id: "a3fZrObqYh8"},
+                {n: "L'invitation royale", id: "x2FkFmevJY0"},
+                {n: "Le bal d'Halloween", id: "6VdjagoPNxs"},
+                {n: "Un cadeau magique", id: "UxUFubnt2l4"},
+                {n: "La fête des mères", id: "9xOIsivHJms"},
+                {n: "La princesse d'abondance", id: "PGK2qFV3FnI"},
+                {n: "Le jardin enchanté", id: "1_N1pkZN4zw"},
+                {n: "Le retour de la fée Pimprenelle", id: "NfVeaJ4IU9Q"},
+                {n: "Le pouvoir de l'amulette", id: "AKy12SU_b8U"},
+                {n: "Le pique-nique royal", id: "vUX-pdwGWp0"},
+                {n: "Sofia et les animaux", id: "uwTstYqXiWk"},
+                {n: "La chanson des sirènes", id: "CVHHry72P8A"}
+            ]
+        },
+        { 
+            title: "Elena d'Avalor", 
+            img: "elena.jpg", 
+            desc: "Après avoir été libérée de l'amulette d'Avalor, la princesse Elena doit apprendre à gouverner son royaume avec courage et sagesse.",
+            episodes: [
+                // --- ÉPISODE : NOUVEAUX POUVOIRS ---
+                {n: "Nouveaux pouvoirs (Partie 1)", id: "NrbM-ZpWa1U"},
+                {n: "Nouveaux pouvoirs (Partie 2)", id: "Q-0G_CC3mO4"},
+                {n: "Nouveaux pouvoirs (Partie 3)", id: "evrIyFLdD9I"},
+                {n: "Nouveaux pouvoirs (Partie 4)", id: "i_R56yjI8rU"},
+
+                // --- ÉPISODE : LA VIE SECRÈTE DES SIRÈNES ---
+                {n: "La vie secrète des sirènes (Partie 1)", id: "PjdbdI1CHZM"},
+                {n: "La vie secrète des sirènes (Partie 2)", id: "mpKyJgoPus4"},
+                {n: "La vie secrète des sirènes (Partie 3)", id: "sDG9n7ILnDw"},
+                {n: "La vie secrète des sirènes (Partie 4)", id: "UW063TpBIC4"},
+                {n: "La vie secrète des sirènes (Partie 5)", id: "E5zXlXSy2ro"},
+
+                // --- VIDÉOS INDIVIDUELLES & EXTRAITS ---
+                {n: "Chanson : My Time", id: "krmXIRPpnCw"},
+                {n: "Le couronnement (Extrait)", id: "J3jBWZTAL-U"},
+                {n: "La magie de la chanson", id: "nHAYglxUk0U"},
+                {n: "Zuzo le guide spirituel", id: "1lPStijhhTo"},
+                {n: "Le bâton de lumière", id: "pymjR8B091Y"},
+                {n: "Elena et Mateo", id: "0Z4butzangE"},
+                {n: "La fête à Avalor", id: "ZnMkRYwVaDg"},
+                {n: "Chanson : Festival du soleil", id: "nLQB7eWBZaM"},
+                {n: "L'envol des Jagulars", id: "boUzeAUkzio"}
+            ]
+        },
+        { 
+            title: "Sam le Pompier", 
+            img: "sam.jpg", 
+            desc: "À Pontypandy, Sam et son équipe de pompiers sont toujours prêts à venir en aide aux habitants dans toutes les situations d'urgence.",
+            episodes: [
+                {n: "Sam le Pompier arrive à la rescousse", id: "GGt9QUOxzzc"},
+                {n: "Une journée bien remplie", id: "W3J3iklX3LY"},
+                {n: "Alerte au feu à Pontypandy", id: "fTtQruVR7vA"},
+                {n: "L'entraînement des pompiers", id: "taocjImhfvU"},
+                {n: "Sam et le grand incendie", id: "sGE8QSVkGW4"},
+                {n: "Sauvetage en mer", id: "6YzIiKG_wT8"},
+                {n: "Le chat coincé dans l'arbre", id: "0B6d7EAw1Gg"},
+                {n: "La parade de Pontypandy", id: "KP6wfuEBEQ0"},
+                {n: "Le barbecue qui tourne mal", id: "hGVfBFPqEhI"},
+                {n: "L'hélicoptère de secours", id: "YYIgvVpNIxw"},
+                {n: "Sam et le petit caneton", id: "Trdgjk-rDk8"},
+                {n: "La grotte mystérieuse", id: "shwethYvGpg"},
+                {n: "Sam sauve la fête", id: "9j9tS0OoKLY"},
+                {n: "Le feu de forêt", id: "5Ff4ibSxuLI"},
+                {n: "Mission Sécurité", id: "AkPq6iiXpBI"},
+                {n: "L'incident du cerf-volant", id: "xS0F98mep6E"},
+                {n: "Aventure sur la glace", id: "q28xdc4rfd4"},
+                {n: "Sam et le trésor", id: "gUzuw63Pp-o"},
+                {n: "Le pique-nique improvisé", id: "wy2y0cZ6FgY"}
+            ]
+        },
     ];
+
 
     let favs = JSON.parse(localStorage.getItem('louna_tv_favs')) || [];
     let rainInterval = null;
+    let currentHeroIndex = 0;
+
+    // Gestion du scroll navbar
+    window.addEventListener("scroll", () => {
+        const nav = document.getElementById("nav");
+        if (window.scrollY > 50) {
+            nav.classList.add("black");
+        } else {
+            nav.classList.remove("black");
+        }
+    });
+
+    // Chargement aléatoire du Hero
+    function initHero() {
+        currentHeroIndex = Math.floor(Math.random() * cartoons.length);
+        const c = cartoons[currentHeroIndex];
+        const banner = document.getElementById('hero-banner');
+        
+        banner.style.backgroundImage = `url('${c.img}')`;
+        document.getElementById('hero-title').innerText = c.title;
+        
+        if(c.desc) {
+            document.querySelector('.banner__description').innerText = c.desc;
+        }
+    }
+
+    function playHero() {
+        openModal(currentHeroIndex);
+    }
+    
+    function infoHero() {
+        openModal(currentHeroIndex);
+    }
 
     function createFallingItem(symbol) {
         const item = document.createElement('div');
@@ -312,47 +634,48 @@
         const val = document.getElementById('searchBar').value.toLowerCase();
         const christmasMsg = document.getElementById('christmas-msg');
         
-        // Reset des effets
         stopRain();
         christmasMsg.style.display = 'none';
 
-        // Déclenchement des surprises
-        if (val === 'amour') {
-            startRain('❤️');
-        } else if (val === 'flocon') {
-            startRain('❄️');
-        } else if (val === 'noël' || val === 'noel') {
-            christmasMsg.style.display = 'block';
-        }
+        if (val === 'amour') startRain('❤️');
+        else if (val === 'flocon') startRain('❄️');
+        else if (val === 'noël' || val === 'noel') christmasMsg.style.display = 'block';
 
-        // Filtrage classique
         const filtered = cartoons.filter(c => c.title.toLowerCase().includes(val));
         const scrollAll = document.getElementById('scroll-all');
         scrollAll.innerHTML = '';
         filtered.forEach(c => {
+            // Trouver l'index original pour le modal
             const idx = cartoons.findIndex(item => item.title === c.title);
-            scrollAll.innerHTML += `<div class="cartoon-card">
-                <div class="fav-badge ${favs.includes(c.title) ? 'active' : ''}" onclick="toggleFav('${c.title}')">❤</div>
-                <img src="${c.img}" onclick="openModal(${idx})">
-            </div>`;
+            scrollAll.innerHTML += createCard(c, idx);
         });
+    }
+
+    function createCard(c, idx) {
+        const isFav = favs.includes(c.title);
+        return `
+            <div class="poster-container">
+                <div class="fav-badge ${isFav ? 'active' : ''}" onclick="toggleFav('${c.title}')">❤</div>
+                <img class="row__poster" src="${c.img}" alt="${c.title}" onclick="openModal(${idx})">
+            </div>
+        `;
     }
 
     function render() {
         const scrollAll = document.getElementById('scroll-all');
         const scrollFavs = document.getElementById('scroll-favs');
+        const scrollReplay = document.getElementById('scroll-replay');
         const sectionFavs = document.getElementById('section-favs');
-        scrollAll.innerHTML = ''; scrollFavs.innerHTML = '';
+        
+        scrollAll.innerHTML = ''; scrollFavs.innerHTML = ''; scrollReplay.innerHTML = '';
 
         cartoons.forEach((c, i) => {
-            const isFav = favs.includes(c.title);
-            const html = `<div class="cartoon-card">
-                    <div class="fav-badge ${isFav ? 'active' : ''}" onclick="toggleFav('${c.title}')">❤</div>
-                    <img src="${c.img}" onclick="openModal(${i})">
-                </div>`;
-            scrollAll.innerHTML += html;
-            if(isFav) scrollFavs.innerHTML += html;
+            const cardHtml = createCard(c, i);
+            scrollAll.innerHTML += cardHtml;
+            scrollReplay.innerHTML += cardHtml; 
+            if(favs.includes(c.title)) scrollFavs.innerHTML += cardHtml;
         });
+        
         sectionFavs.style.display = favs.length > 0 ? 'block' : 'none';
     }
 
@@ -368,25 +691,93 @@
         const list = document.getElementById('modal-list');
         list.innerHTML = c.episodes.map(ep => {
             const videoUrl = ep.id ? `https://www.youtube.com/embed/${ep.id}?autoplay=1` : ep.url;
-            return `<div class="episode-row" onclick="playVideo('${videoUrl}', '${ep.n.replace(/'/g, "\\'")}', ${i})">▶ ${ep.n}</div>`;
+            // Correction pour éviter les erreurs avec les apostrophes dans les titres
+            const safeTitle = ep.n.replace(/'/g, "\\'");
+            return `<div class="episode-row" onclick="playVideo('${videoUrl}', '${safeTitle}', ${i})">
+                <span style="margin-right:10px;">▶</span> ${ep.n}
+            </div>`;
         }).join('');
-        document.getElementById('modal-episodes').style.display = 'flex';
+        
+        const modal = document.getElementById('modal-episodes');
+        modal.style.display = 'flex';
+        
+        // Gérer le bouton retour du navigateur pour fermer le modal
+        window.history.pushState({modalOpen: true}, "");
     }
 
     function playVideo(url, title, index) {
-        document.getElementById('modal-list').innerHTML = `
-            <div style="text-align:center; margin-bottom:15px;">
-                <button onclick="openModal(${index})" style="background:var(--accent); border:none; padding:10px 20px; border-radius:20px; font-weight:bold;">⬅ Retour</button>
-                <p style="margin-top:10px; font-size:0.9rem;">${title}</p>
+        const list = document.getElementById('modal-list');
+        // Structure améliorée pour le bouton Retour
+        list.innerHTML = `
+            <div class="back-btn-container">
+                <button class="back-btn" onclick="openModal(${index})">
+                    ⬅ Retour aux épisodes
+                </button>
+                <h3 style="margin-top:10px; color:white;">${title}</h3>
             </div>
-            <div class="video-wrapper"><iframe src="${url}" frameborder="0" allowfullscreen></iframe></div>`;
+            <div class="video-wrapper">
+                <iframe src="${url}" frameborder="0" allowfullscreen></iframe>
+            </div>`;
     }
 
     function closeModal() { 
         document.getElementById('modal-episodes').style.display = 'none'; 
+        document.getElementById('modal-list').innerHTML = '';
+        // Nettoyer l'historique si on ferme manuellement
+        if (history.state && history.state.modalOpen) {
+            history.back();
+        }
     }
 
+    // Gestionnaire global du bouton retour navigateur
+    window.onpopstate = function(event) {
+        if (!event.state) {
+            document.getElementById('modal-episodes').style.display = 'none';
+            document.getElementById('modal-list').innerHTML = '';
+        }
+    };
+
+    // Initialisation
+    initHero();
     render();
+
+
+    function displayEpisodes(cartoon) {
+    const container = document.getElementById('episodes-list');
+    container.innerHTML = ""; 
+
+    cartoon.episodes.forEach(ep => {
+        const btn = document.createElement('button');
+        btn.innerText = ep.n;
+
+        btn.onclick = function() {
+            if (ep.url) {
+                // SOLUTION ICI : On ouvre dans un nouvel onglet
+                // Cela évite l'erreur "n'autorise pas la connexion"
+                window.open(ep.url, '_blank');
+            } else {
+                // Pour Sofia et Elena (YouTube)
+                playVideo(ep.id); 
+            }
+        };
+
+        container.appendChild(btn);
+    });
+}
+
+function playEpisode(episode) {
+    if (episode.url) {
+        // C'EST CETTE LIGNE QUI RÈGLE LE PROBLÈME :
+        // Elle ouvre le site dans un nouvel onglet au lieu de le bloquer dans votre page.
+        window.open(episode.url, '_blank');
+    } else {
+        // Code pour vos vidéos YouTube habituelles (Sofia, Elena)
+        const videoId = episode.id;
+        document.getElementById('video-player').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    }
+}
+
+
 </script>
 </body>
 </html>
