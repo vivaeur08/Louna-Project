@@ -76,7 +76,7 @@ body {
 .catch-btn { border-color: #ff4d6d; }
 .puzzle-btn { border-color: #4da3ff; }
 .flappy-btn { border-color: #63f43f; }
-
+.travel-btn { border-color: #d81bf1; }
 /* CADEAU */
 .gift-section { 
     display: flex; 
@@ -167,4 +167,5 @@ body {
     padding-top: 60px;
   }
 }
+
 
