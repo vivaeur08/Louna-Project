@@ -2,7 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Louna Town - Professionnel</title>
     <style>
 /* Bloque la sélection bleue sur tout le jeu */
@@ -35,6 +37,8 @@
     /* Empêche tout comportement textuel */
     user-select: none !important;
 }
+
+
         :root {
             --panel-bg: rgba(255, 255, 255, 0.8);
             --accent: #ff6b6b;
@@ -152,7 +156,35 @@
     }
     @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+:root {
+    /* Marges automatiques pour l'encoche iPhone (Top) et la barre Home (Bottom) */
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+}
 
+
+/* Ajustement du Header (Stats) pour iPhone */
+.header {
+    padding-top: 10px; /* Un peu d'espace supplémentaire */
+    border-radius: 0 0 25px 25px;
+}
+
+/* Ajustement des boutons du bas (Home Bar) */
+.actions {
+    margin-bottom: calc(var(--safe-bottom) + 15px);
+}
+
+/* Pour le menu Ville : on s'assure que le contenu n'est pas caché en bas */
+#town-ui {
+    padding-bottom: var(--safe-bottom);
+    padding-top: var(--safe-top);
+}
+
+/* Désactive le menu contextuel "Copier" quand on reste appuyé sur un objet */
+* {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+}
     </style>
 </head>
 <body>
@@ -702,6 +734,17 @@ window.addEventListener('touchend', () => {
         saveGame();
     }
 });
+
+function fixMobileHeight() {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+window.addEventListener('resize', fixMobileHeight);
+fixMobileHeight();
+
+// Dans ton CSS, remplace height: 100vh par :
+// height: calc(var(--vh, 1vh) * 100);
 
 // Écouteurs globaux sur la fenêtre pour ne pas perdre l'objet si on bouge trop vite
 window.addEventListener('mousemove', handleMove);
