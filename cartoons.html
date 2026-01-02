@@ -842,19 +842,24 @@ function playVideo(idx, eIdx) {
     document.getElementById('modal-list').style.display = 'none';
     document.getElementById('video-area').style.display = 'block';
     
-    // On affiche le lecteur
     const player = document.getElementById('video-player');
     const fallback = document.getElementById('youtube-fallback');
     const externalBtn = document.getElementById('external-link-btn');
     
+    // On charge la vidéo normalement
     player.src = `https://www.youtube.com/embed/${ep.id}?autoplay=1`;
-    
-    // On prépare le bouton de secours au cas où l'intégration est bloquée
-    // (Certaines chaînes comme Didou bloquent l'iframe, on affiche donc toujours le bouton de secours par-dessus au bout de 2 secondes pour aider)
-    fallback.style.display = "flex"; 
-    externalBtn.onclick = () => {
-        window.open(`https://www.youtube.com/watch?v=${ep.id}`, "_blank");
-    };
+
+    // --- CONDITION SPÉCIALE DIDOU ---
+    if (c.title === "Didou") {
+        // Pour Didou, on affiche le bouton de secours YouTube
+        fallback.style.display = "flex";
+        externalBtn.onclick = () => {
+            window.open(`https://www.youtube.com/watch?v=${ep.id}`, "_blank");
+        };
+    } else {
+        // Pour les autres, on cache le bouton de secours
+        fallback.style.display = "none";
+    }
 
     // Gestion du bouton Suivant
     const nextCont = document.getElementById('next-btn-container');
@@ -867,7 +872,7 @@ function playVideo(idx, eIdx) {
         nextCont.appendChild(b);
     }
     
-    render(); // Pour mettre à jour les badges de progression en arrière-plan
+    render(); // Met à jour les badges de progression au menu
 }
 
     function stopVideo() {
@@ -975,3 +980,4 @@ function infoHero() {
 </script>
 </body>
 </html>
+
