@@ -89,7 +89,28 @@
     user-select: none !important;
 }
 
+body {
+    margin: 0;
+    padding: 0;
+    /* Utilise la variable --vh pour la hauteur réelle du mobile */
+    height: calc(var(--vh, 1vh) * 100); 
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centre verticalement */
+    align-items: center;     /* Centre horizontalement */
+    overflow: hidden;        /* Empêche le scroll inutile */
+}
 
+/* Conteneur principal qui regroupe tout le jeu sauf les menus */
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px; /* Taille idéale pour iPhone */
+    gap: 10px;        /* Espace entre les stats, les missions et la grille */
+}
         :root {
             --panel-bg: rgba(255, 255, 255, 0.8);
             --accent: #ff6b6b;
@@ -987,3 +1008,4 @@ function updateTotemsUI() {
 </script>
 </body>
 </html>
+
