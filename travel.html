@@ -6,7 +6,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Louna Town - Professionnel</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
+
+        
 /* Bloque la sélection bleue sur tout le jeu */
 * {
     -webkit-tap-highlight-color: transparent;
@@ -372,39 +375,69 @@ function goHome() {
             cell.onclick = () => handleCellClick(i); grid.appendChild(cell);
         }
     }
+function handleCellClick(idx) {
+    const world = gameState.worldsData[gameState.currentWorld];
+    const clicked = world.grid[idx];
 
-    function handleCellClick(idx) {
-        const world = gameState.worldsData[gameState.currentWorld];
-        const clicked = world.grid[idx];
+    if (selectedIdx === null) {
+        if (clicked) selectedIdx = idx;
+    } else {
+        const selected = world.grid[selectedIdx];
+        
+        // --- CAS 1 : On clique deux fois sur le même objet ---
+        if (selectedIdx === idx) {
+            // Si c'est un bonus d'énergie, on le ramasse
+            if (clicked && clicked.type === 'energy') {
+                const rewards = { 1: 1, 2: 5, 3: 10 };
+                gameState.energy += rewards[clicked.lvl] || 1;
+                world.grid[idx] = null;
+                showMsg("Énergie récupérée ! ⚡");
+            }
+            selectedIdx = null;
+        } 
+        
+        // --- CAS 2 : FUSION (Même type, même niveau) ---
+        else if (clicked && selected && clicked.type === selected.type && clicked.lvl === selected.lvl && clicked.lvl < 14) {
+            world.grid[idx].lvl++;
+            world.grid[selectedIdx] = null;
+            selectedIdx = null;
+            showMsg("Fusion ! ✨");
 
-        if (selectedIdx === null) {
-            if (clicked) selectedIdx = idx;
-        } else {
-            const selected = world.grid[selectedIdx];
-            if (selectedIdx === idx) {
-                if (clicked && clicked.type === 'energy') {
-                    gameState.energy += energyRewards[clicked.lvl].val;
-                    world.grid[idx] = null;
-                }
-                selectedIdx = null;
-            } else if (clicked && selected && clicked.type === selected.type && clicked.lvl === selected.lvl && clicked.lvl < 8) {
-                // FUSION
-                world.grid[idx].lvl++;
-                world.grid[selectedIdx] = null;
-                selectedIdx = null;
-                showMsg("Fusion ! ✨");
+            // Chance d'apparition d'un bonus d'énergie (30% de chance)
+            if (Math.random() > 0.7) {
+                const empty = world.grid.map((v, i) => v === null ? i : null).filter(v => v !== null);
+                if (empty.length > 0) world.grid[empty[0]] = { type: 'energy', lvl: 1 };
+            }
+
+            // CHECK TOTEM (Niveau 8) + CONFETTIS
+            if (world.grid[idx].lvl === 8 && gameState.currentWorld < 4 && !gameState.totems[gameState.currentWorld]) {
+                gameState.totems[gameState.currentWorld] = true;
+                showMsg(`TOTEM OBTENU ! ${worldConfigs[gameState.currentWorld].totem}`);
                 
-                // TOTEM CHECK
-                if (world.grid[idx].lvl === 8 && gameState.currentWorld < 4) {
-                    gameState.totems[gameState.currentWorld] = true;
-                    showMsg(`TOTEM OBTENU ! ${worldConfigs[gameState.currentWorld].totem}`);
-                }
-            } else if (!clicked) {
-                world.grid[idx] = selected; world.grid[selectedIdx] = null; selectedIdx = null;
-            } else selectedIdx = idx;
+                // Déclenchement des confettis
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#ff6b6b', '#ffbe0b', '#4caf50', '#4facfe']
+                });
+            }
+        } 
+        
+        // --- CAS 3 : DÉPLACEMENT sur une case vide ---
+        else if (!clicked) {
+            world.grid[idx] = selected;
+            world.grid[selectedIdx] = null;
+            selectedIdx = null;
+        } 
+        
+        // --- CAS 4 : CHANGER de sélection ---
+        else {
+            selectedIdx = idx;
         }
-        updateUI();
     }
+    updateUI();
+}
 
     function generateItem() {
         if (gameState.energy <= 0) return showMsg("Dors un peu... 😴");
@@ -462,7 +495,7 @@ function createOrder(wId) {
     }
 
     // --- UI ---
-    function updateUI() {
+function updateUI() {
         const config = worldConfigs[gameState.currentWorld];
         const data = gameState.worldsData[gameState.currentWorld];
         
@@ -470,7 +503,7 @@ function createOrder(wId) {
         document.getElementById('coins').innerText = gameState.coins;
         document.body.style.background = config.color;
 
-        // Grille stable
+        // 1. Grille stable
         data.grid.forEach((item, i) => {
             const cell = document.getElementById(`cell-${i}`);
             const icon = item ? (item.type === 'energy' ? energyRewards[item.lvl].icon : config.items[item.lvl]) : '';
@@ -479,27 +512,43 @@ function createOrder(wId) {
             cell.classList.toggle('selected', i === selectedIdx);
         });
 
-        // Missions 3D
+        // 2. Missions 3D avec Skip (Passer)
         const ordersEl = document.getElementById('orders-list');
         ordersEl.innerHTML = '';
         if (data.orders.length === 0) createOrder(gameState.currentWorld);
+        
         data.orders.forEach((order, idx) => {
             const ready = data.grid.some(it => it && it.type === 'normal' && it.lvl === order.level);
             const time = Math.max(0, Math.floor((order.expiresAt - Date.now()) / 1000));
             const card = document.createElement('div');
-            card.className = `order-card ${ready?'ready':''}`;
+            card.className = `order-card ${ready ? 'ready' : ''}`;
             card.innerHTML = `
                 <img src="${order.img}" class="char-3d">
                 <div class="order-item">${config.items[order.level]}</div>
                 <div class="order-timer" style="${time <= 10 ? 'color:red; animation:blink 0.5s infinite' : ''}">
                     ⏱️ ${Math.floor(time/60)}:${(time%60).toString().padStart(2,'0')}
                 </div>
+                ${!ready ? `<div style="font-size:0.6rem; color:#888; margin-top:4px;">🔄 Passer (20💰)</div>` : ''}
             `;
-            if (ready) card.onclick = () => completeOrder(idx);
+            
+            // Si prêt : on valide la mission. Si pas prêt : on propose de passer (Skip)
+            card.onclick = ready ? () => completeOrder(idx) : () => {
+                if (gameState.coins >= 20) {
+                    if (confirm("Changer de client pour 20 💰 ?")) {
+                        gameState.coins -= 20;
+                        data.orders.splice(idx, 1);
+                        createOrder(gameState.currentWorld);
+                        updateUI();
+                        showMsg("Nouveau client ! 🔄");
+                    }
+                } else {
+                    showMsg("Pas assez de pièces ! 💰");
+                }
+            };
             ordersEl.appendChild(card);
         });
 
-        // Totems Bar
+        // 3. Totems Bar
         const totemBar = document.getElementById('totem-bar');
         totemBar.innerHTML = '';
         for(let i=0; i<4; i++) {
@@ -509,19 +558,33 @@ function createOrder(wId) {
             totemBar.appendChild(slot);
         }
 
-        // Worlds Menu
+        // 4. Worlds Menu avec Confettis pour l'Olympe
         const menu = document.getElementById('worlds-menu'); menu.innerHTML = '';
         worldConfigs.forEach(w => {
             const unlocked = gameState.unlockedWorlds.includes(w.id);
-            const canUnlock = (w.id === 4) ? (gameState.totems.every(t => t === true)) : (gameState.coins >= w.price);
             const btn = document.createElement('div');
             btn.className = `world-btn ${unlocked ? 'unlocked' : ''} ${gameState.currentWorld === w.id ? 'active' : ''}`;
             btn.innerHTML = (w.id === 4 && !unlocked) ? "🏛️🔒" : w.icon;
+            
             btn.onclick = () => {
-                if (unlocked) { gameState.currentWorld = w.id; updateUI(); }
-                else if (w.id === 4) { if (gameState.totems.every(t => t === true)) unlockWorld(w); else showMsg("Il te faut les 4 totems !"); }
-                else if (gameState.coins >= w.price) unlockWorld(w);
-                else showMsg(`Il te manque ${w.price - gameState.coins} 💰`);
+                if (unlocked) { 
+                    gameState.currentWorld = w.id; 
+                    updateUI(); 
+                }
+                else if (w.id === 4) { 
+                    if (gameState.totems.every(t => t === true)) {
+                        unlockWorld(w);
+                        confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } }); // 🎉
+                    } else {
+                        showMsg("Il te faut les 4 totems ! 🏰🍫🔱🧞");
+                    }
+                }
+                else if (gameState.coins >= w.price) {
+                    unlockWorld(w);
+                }
+                else {
+                    showMsg(`Il te manque ${w.price - gameState.coins} 💰`);
+                }
             };
             menu.appendChild(btn);
         });
