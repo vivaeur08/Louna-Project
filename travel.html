@@ -86,30 +86,6 @@
     user-select: none !important;
 }
 
-html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden; /* Empêche le scroll latéral qui crée un effet de zoom */
-    touch-action: none; /* Bloque le zoom tactile natif */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #f0f0f0; /* Couleur de fond pour voir les bords si besoin */
-}
-
-#game-container {
-    width: 100vw;
-    height: 100vh;
-    height: calc(var(--vh, 1vh) * 100);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    transform-origin: center; /* Important pour le centrage */
-}
         :root {
             --panel-bg: rgba(255, 255, 255, 0.8);
             --accent: #ff6b6b;
@@ -1052,6 +1028,7 @@ document.getElementById('grid').addEventListener('click', (e) => {
 </script>
 </body>
 </html>
+
 
 
 
