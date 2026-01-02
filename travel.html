@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=0.5, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Louna Town - Professionnel</title>
@@ -16,6 +16,54 @@
     user-select: none !important;
     -webkit-user-select: none !important;
 }
+
+/* Menus Latéraux */
+.side-menu {
+    position: fixed;
+    top: 0;
+    height: 100%;
+    width: 80px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 60px;
+    gap: 15px;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+#menu-left { left: 0; transform: translateX(-100%); border-radius: 0 20px 20px 0; }
+#menu-right { right: 0; transform: translateX(100%); border-radius: 20px 0 0 20px; }
+
+/* Classes pour ouvrir les menus */
+.side-menu.open { transform: translateX(0) !important; }
+
+/* Boutons pour ouvrir les menus */
+.toggle-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    z-index: 1100;
+    font-size: 20px;
+}
+#btn-open-left { left: 5px; }
+#btn-open-right { right: 5px;top: 70%; }
+
+/* Ajustement de la grille pour téléphone */
+.grid {
+    grid-template-columns: repeat(4, 65px);
+    grid-template-rows: repeat(4, 65px);
+    gap: 8px;
+}
+
 
 .placed-item {
     position: absolute;
@@ -188,10 +236,62 @@
     -webkit-touch-callout: none;
     -webkit-user-select: none;
 }
+
+/* Cache les boutons d'ouverture quand un menu est ouvert */
+body.menu-open .toggle-btn {
+    display: none;
+}
+
+/* Zone de clic centrale pour fermer le menu */
+#overlay-closer {
+    position: fixed;
+    inset: 0;
+    display: none; /* Caché par défaut */
+    z-index: 900; /* Sous le menu, mais au-dessus de la grille */
+}
+
+body.menu-open #overlay-closer {
+    display: block;
+}
+
+/* Totems toujours visibles (on les sort du menu) */
+#totem-bar {
+    position: fixed;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 10px;
+    border-radius: 20px;
+    z-index: 1200; /* Toujours au-dessus */
+    pointer-events: none; /* Ne gêne pas le clic */
+}
+
+.totem-slot { font-size: 1.5rem; filter: grayscale(1); opacity: 0.3; }
+.totem-slot.active { filter: grayscale(0); opacity: 1; }
+
     </style>
 </head>
 <body>
+    <div id="overlay-closer" onclick="closeAllMenus()"></div>
 
+    <button id="btn-open-left" class="toggle-btn" onclick="toggleMenu('menu-left')">🌍</button>
+    <button id="btn-open-right" class="toggle-btn" onclick="toggleMenu('menu-right')">⚙️</button>
+
+    <div id="totem-bar"></div>
+
+    <div id="menu-left" class="side-menu">
+        <div id="worlds-menu"></div>
+    </div>
+
+    <div id="menu-right" class="side-menu">
+        <button class="btn-round" onclick="toggleTownMenu()">🏡</button>
+        <button class="btn-round" onclick="toggleCreaMenu()">👤</button>
+        </div>
+    
 <div class="header">
     <div class="stats-container">
         <div class="stat-bubble" style="color:#1976d2">⏱️ <span id="timer">00:00</span></div>
@@ -564,7 +664,7 @@ function updateUI() {
             const unlocked = gameState.unlockedWorlds.includes(w.id);
             const btn = document.createElement('div');
             btn.className = `world-btn ${unlocked ? 'unlocked' : ''} ${gameState.currentWorld === w.id ? 'active' : ''}`;
-            btn.innerHTML = (w.id === 4 && !unlocked) ? "🏛️🔒" : w.icon;
+            btn.innerHTML = (w.id === 4 && !unlocked) ? "🏛️" : w.icon;
             
             btn.onclick = () => {
                 if (unlocked) { 
@@ -806,6 +906,8 @@ function fixMobileHeight() {
 window.addEventListener('resize', fixMobileHeight);
 fixMobileHeight();
 
+
+
 // Dans ton CSS, remplace height: 100vh par :
 // height: calc(var(--vh, 1vh) * 100);
 
@@ -837,9 +939,51 @@ window.addEventListener('touchend', endDrag);
         }
     }
 }
+
+function toggleMenu(id) {
+    const menu = document.getElementById(id);
+    menu.classList.toggle('open');
+    
+    // Ferme l'autre menu s'il est ouvert
+    const otherId = id === 'menu-left' ? 'menu-right' : 'menu-left';
+    document.getElementById(otherId).classList.remove('open');
+}
+
+// Optionnel : Fermer les menus si on clique sur la grille pour jouer
+document.getElementById('grid').addEventListener('touchstart', () => {
+    document.getElementById('menu-left').classList.remove('open');
+    document.getElementById('menu-right').classList.remove('open');
+});
+
+function toggleMenu(id) {
+    const menu = document.getElementById(id);
+    const isOpen = menu.classList.contains('open');
+    
+    // Ferme tout avant d'ouvrir
+    closeAllMenus();
+    
+    if (!isOpen) {
+        menu.classList.add('open');
+        document.body.classList.add('menu-open');
+    }
+}
+
+function closeAllMenus() {
+    // Retire la classe open de tous les menus
+    document.querySelectorAll('.side-menu').forEach(m => m.classList.remove('open'));
+    // Retire la classe qui cache les boutons
+    document.body.classList.remove('menu-open');
+}
+
+// Modifie ta fonction updateUI pour qu'elle ne vide pas le totem-bar 
+// mais mette juste à jour les classes 'active'
+function updateTotemsUI() {
+    const slots = document.querySelectorAll('.totem-slot');
+    gameState.totems.forEach((unlocked, i) => {
+        if(slots[i]) slots[i].classList.toggle('active', unlocked);
+    });
+}
+
 </script>
 </body>
 </html>
-
-
-
