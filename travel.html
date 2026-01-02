@@ -980,25 +980,23 @@ function updateTotemsUI() {
     });
 }
     
-function autoResponsive() {
+function adjustLayout() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+
     const container = document.getElementById('game-container');
     const screenWidth = window.innerWidth;
     
-    // Si l'écran est petit (iPhone), on réduit l'échelle du conteneur
-    if (screenWidth < 380) {
-        const ratio = screenWidth / 400; // 400 est la largeur idéale de ton jeu
-        container.style.transform = `scale(${ratio})`;
-    } else {
-        container.style.transform = `scale(1)`;
+    // Si l'écran est un iPhone (largeur autour de 375px-390px)
+    // On s'assure que le container prend bien toute la largeur
+    if (screenWidth < 500) {
+        container.style.width = "100%";
+        container.style.transform = "scale(1)"; // On ne réduit plus !
     }
 }
 
-// Appeler au chargement et au redimensionnement
-window.addEventListener('resize', () => {
-    fixMobileHeight(); // Ta fonction existante
-    autoResponsive();
-});
-window.addEventListener('load', autoResponsive);
+window.addEventListener('resize', adjustLayout);
+window.addEventListener('load', adjustLayout);
 
 function toggleMenu(id) {
     const menu = document.getElementById(id);
@@ -1028,6 +1026,7 @@ document.getElementById('grid').addEventListener('click', (e) => {
 </script>
 </body>
 </html>
+
 
 
 
