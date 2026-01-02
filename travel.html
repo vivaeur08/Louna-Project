@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Louna Town - Professionnel</title>
+    <style>
+/* Bloque la sélection bleue sur tout le jeu */
+* {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+.placed-item {
+    position: absolute;
+    font-size: 3.5rem;
+    cursor: grab;
+    /* Empêche le bleu et le "fantôme" de l'émoji */
+    pointer-events: auto;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+    touch-action: none !important; /* Crucial pour mobile */
+}
+
+.placed-item:active {
+    cursor: grabbing;
+}
+
+#town-landscape {
+    background: #91cf60; 
+    border-radius: 40px;
+    position: relative;
+    overflow: hidden;
+    /* Empêche tout comportement textuel */
+    user-select: none !important;
+}
+        :root {
+            --panel-bg: rgba(255, 255, 255, 0.8);
+            --accent: #ff6b6b;
+            --success: #4caf50;
+            --shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        body {
+            margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
+            height: 100vh; display: flex; flex-direction: column; align-items: center;
+            overflow: hidden; transition: 0.5s;
+        }
+
+        /* --- HEADER (STATS) --- */
+        .header {
+            width: 100%; background: var(--panel-bg); backdrop-filter: blur(15px);
+            padding: 15px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 0 0 30px 30px; z-index: 100;
+        }
+        .stats-container { display: flex; justify-content: center; gap: 20px; }
+        .stat-bubble {
+            background: white; padding: 8px 18px; border-radius: 25px;
+            box-shadow: var(--shadow); font-weight: bold; display: flex; align-items: center; gap: 8px;
+        }
+
+        /* --- MISSIONS (PERSONNAGES 3D) --- */
+        .orders-container { display: flex; justify-content: center; gap: 12px; margin: 15px 0; height: 110px; width: 100%; }
+        .order-card {
+            background: white; border-radius: 20px; padding: 10px; width: 100px;
+            display: flex; flex-direction: column; align-items: center;
+            border: 3px solid #eee; box-shadow: var(--shadow); transition: 0.3s;
+        }
+        .order-card.ready { border-color: var(--success); background: #f0fff0; animation: bounce 1s infinite; cursor: pointer; }
+        .char-3d { width: 45px; height: 45px; border-radius: 50%; background: #f0f0f0; margin-bottom: 5px; object-fit: cover; }
+        .order-item { font-size: 1.8rem; line-height: 1; }
+        .order-timer { font-size: 0.7rem; font-weight: bold; color: #666; margin-top: 5px; }
+
+        /* --- PLATEAU DE JEU 3D --- */
+        .main-layout { display: flex; align-items: center; gap: 20px; padding: 10px; }
+        .board-container {
+            background: rgba(0, 0, 0, 0.05); padding: 15px; border-radius: 30px;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.1), 0 10px 0 rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+        .grid { display: grid; grid-template-columns: repeat(4, 72px); grid-template-rows: repeat(4, 72px); gap: 10px; }
+        .cell {
+            width: 72px; height: 72px; background: rgba(255,255,255,0.6);
+            border-radius: 15px; display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem; cursor: pointer; position: relative;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1); transition: 0.2s;
+        }
+        .cell.selected { border: 4px solid var(--accent); background: white; transform: translateY(-5px); box-shadow: 0 8px 20px var(--accent); }
+
+        /* --- BARRE DE TOTEMS VERTICALE --- */
+        .totem-bar {
+            display: flex; flex-direction: column; gap: 10px; padding: 15px;
+            background: var(--panel-bg); border-radius: 20px; box-shadow: var(--shadow);
+        }
+        .totem-slot {
+            width: 45px; height: 45px; background: #eee; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; filter: grayscale(1); opacity: 0.3; transition: 0.5s;
+        }
+        .totem-slot.active { filter: grayscale(0); opacity: 1; background: white; transform: scale(1.1); box-shadow: 0 0 10px var(--gold); }
+
+        /* --- MONDES MENU --- */
+        .worlds-menu { display: flex; flex-direction: column; gap: 10px; }
+        .world-btn {
+            width: 50px; height: 50px; border-radius: 50%; background: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; border: 3px solid transparent; cursor: pointer;
+            box-shadow: var(--shadow); filter: grayscale(1); transition: 0.3s;
+        }
+        .world-btn.unlocked { filter: grayscale(0); }
+        .world-btn.active { border-color: var(--accent); transform: scale(1.1); }
+
+        /* --- ACTIONS --- */
+        .actions { display: flex; gap: 15px; margin-top: 20px; }
+        .btn-round {
+            width: 65px; height: 65px; border-radius: 50%; border: 4px solid white;
+            font-size: 1.6rem; color: white; cursor: pointer; box-shadow: var(--shadow);
+            display: flex; align-items: center; justify-content: center; transition: 0.1s;
+        }
+        .btn-round:active { transform: scale(0.9); }
+
+        /* --- ANIMATIONS & BADGES --- */
+        .level-badge { position: absolute; bottom: 3px; right: 3px; font-size: 0.6rem; background: rgba(0,0,0,0.7); color: white; padding: 2px 5px; border-radius: 6px; }
+#msg {
+    position: fixed;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centre parfaitement le message */
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+    font-size: 2rem;
+    pointer-events: none;
+    z-index: 9999; /* Plus élevé que l'UI de la ville (3000) */
+    text-align: center;
+    width: 100%;
+}       
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+
+        .build-card {
+        min-width: 90px; height: 100px; background: white; border-radius: 20px; border: 3px solid #eee;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-size: 1.5rem; cursor: pointer; transition: 0.2s;
+    }
+    .build-card:active { transform: scale(0.9); }
+    .placed-item {
+        position: absolute; font-size: 3rem; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: move; /* Indique qu'on peut imaginer les déplacer */
+    }
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="stats-container">
+        <div class="stat-bubble" style="color:#1976d2">⏱️ <span id="timer">00:00</span></div>
+        <div class="stat-bubble">⚡ <span id="energy">50</span></div>
+        <div class="stat-bubble" style="color:#f57c00">💰 <span id="coins">0</span></div>
+    </div>
+    <div class="orders-container" id="orders-list"></div>
+</div>
+
+<div id="msg"></div>
+
+<div class="main-layout">
+    <div class="worlds-menu" id="worlds-menu"></div>
+    
+    <div class="board-container">
+        <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="totem-bar" id="totem-bar"></div>
+</div>
+
+<div class="actions">
+    <button class="btn-round" style="background: #ffbe0b;" onclick="generateItem()">🎁</button>
+    <button class="btn-round" style="background: #333;" onclick="resetFullGame()">🗑️</button>
+</div>
+
+<button class="btn-round" style="position: fixed; top: 15px; right: 15px; width: 55px; height: 55px; z-index: 999; background: white; border: 3px solid #ff6b6b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onclick="toggleCreaMenu()">👤</button>
+
+<div id="crea-menu" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+    <div style="background: white; padding: 25px; border-radius: 30px; text-align: center; width: 300px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; border: 4px solid #fff;">
+        <h3 style="margin-bottom: 10px; color: #333; font-family: sans-serif;">Ton Personnage</h3>
+        
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 25px 0;">
+            <button class="btn-round" style="background: #f0f0f0; color: #333; width: 40px; height: 40px; font-size: 1rem; border: none; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" onclick="changeAvatarSelection(-1)">◀</button>
+            
+            <div id="avatar-container" style="width: 130px; height: 130px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #fff 0%, #f0f0f0 100%); border-radius: 50%; border: 4px solid #ff6b6b;">
+                <img id="avatar-preview" src="" style="width: 110px; height: 110px; border-radius: 50%; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            </div>
+            
+            <button class="btn-round" style="background: #f0f0f0; color: #333; width: 40px; height: 40px; font-size: 1rem; border: none; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" onclick="changeAvatarSelection(1)">▶</button>
+        </div>
+
+        <button class="btn-round" style="background: #4caf50; width: 100%; padding: 15px; border-radius: 20px; font-size: 1.1rem; color: white; border: none; cursor: pointer; font-weight: bold; box-shadow: 0 4px 0 #2e7d32;" onclick="toggleCreaMenu()">VALIDER</button>
+    </div>
+</div>
+
+<div id="my-avatar-display" style="position: fixed; right: 15px; top: 180px; width: 75px; height: 75px; background: white; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: none; align-items: center; justify-content: center; z-index: 900; overflow: hidden;">
+    <img id="current-avatar-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
+</div>
+
+<button id="town-btn" class="btn-round" style="position: fixed; right: 15px; top: 270px; width: 60px; height: 60px; z-index: 999; background: #4caf50; border: 3px solid white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onclick="toggleTownMenu()">🏡</button>
+
+<div id="town-ui" style="display:none; position: fixed; inset: 0; background: linear-gradient(to bottom, #87CEEB, #E0F7FA); z-index: 3000; flex-direction: column; align-items: center; overflow-y: auto; padding: 20px;">
+    
+    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <button class="btn-round" style="background: white; color: #333; width: 45px; height: 45px;" onclick="toggleTownMenu()">⬅️</button>
+        <h2 style="color: #2c3e50; font-family: sans-serif; background: white; padding: 10px 20px; border-radius: 20px;">Ma Ville Louna</h2>
+<div class="stat-bubble" style="background: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    💰 <span id="town-coins">0</span>
+</div>
+    </div>
+
+<div id="town-landscape" style="position: relative; width: 100%; max-width: 400px; height: 450px; background: #91cf60; border-radius: 40px; box-shadow: inset 0 -10px 0 #7cb342, 0 10px 30px rgba(0,0,0,0.2); border: 8px solid #fff; margin-bottom: 10px; overflow: hidden;">
+    </div>
+<p style="font-size: 0.8rem; color: #666; margin-top: 0;">💡 Maintiens et glisse pour déplacer les objets !</p>
+    <div style="width: 100%; max-width: 450px; background: rgba(255,255,255,0.9); border-radius: 30px; padding: 15px; display: flex; gap: 15px; overflow-x: auto; white-space: nowrap;">
+        <div class="build-card" onclick="buyBuilding('house', 1000, '🏠')">🏠<br><small>Maison<br>1000💰</small></div>
+        <div class="build-card" onclick="buyBuilding('tree', 300, '🌳')">🌳<br><small>Arbre<br>300💰</small></div>
+        <div class="build-card" onclick="buyBuilding('pool', 2500, '🏊')">🏊<br><small>Piscine<br>2500💰</small></div>
+        <div class="build-card" onclick="buyBuilding('shop', 5000, '🏪')">🏪<br><small>Magasin<br>5000💰</small></div>
+        <div class="build-card" onclick="buyBuilding('statue', 10000, '🗿')">🗿<br><small>Statue Gold<br>10k💰</small></div>
+    </div>
+</div>
+
+<button class="btn-round" style="position: fixed; top: 15px; left: 15px; width: 55px; height: 55px; z-index: 999; background: white; border: 3px solid #4facfe; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onclick="goHome()">🏠</button>
+
+<script>
+function goHome() {
+    if (confirm("Louna, veux-tu vraiment quitter le jeu et retourner à l'accueil ?")) {
+        window.location.href = "index.html";
+    }
+}
+</script>
+
+<script>
+    // --- CONFIGURATION ---
+    const worldConfigs = [
+        { id: 0, name: "Jardin", icon: "🌱", totem: "🏰", color: "linear-gradient(180deg, #a1c4fd 0%, #c2e9fb 100%)", price: 0, items: ["","🌱","🌿","🌸","🌹","💐","💏​","💍","🧺","🏠​","🏡","​🏘️​","​💒​","​🏯​","🏰"] },
+        { id: 1, name: "Friandises", icon: "🍬", totem: "🍫", color: "linear-gradient(180deg, #ff9a9e 0%, #fecfef 100%)", price: 1000, items: ["","🥖","🥐","🍬","🍭","🍩","🍪","🍰","🧁","🍦","🍧​​","🍨","🍫"] },
+        { id: 2, name: "Océan", icon: "🐚", totem: "🔱", color: "linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%)", price: 2000, items: ["","🐚","🦀","🐠","🐙","🐬","🐳","🦈","🧜‍♀️","🔱"] },
+        { id: 3, name: "Désert", icon: "🌵", totem: "🧞", color: "linear-gradient(180deg, #f6d365 0%, #fda085 100%)", price: 3000, items: ["","🌵","🏜️","🐪","🐫","🏺","🕌","💎","🧞"] },
+        { id: 4, name: "Olympe", icon: "🏛️", totem: "⚡", color: "linear-gradient(180deg, #cfd9df 0%, #e2ebf0 100%)", price: "TOTEMS", items: ["","☁️","⛈️","🔱","🦅","🏛️","🏹","⚖️","⚡"] }
+    ];
+
+    const characters3D = [
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Boy.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Girl.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Crying%20Cat.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Enraged%20Face.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Detective.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Vampire.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Supervillain.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Person%20Juggling.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Butterfly.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Dog%20Face.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Frog.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Fox.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Monkey%20Face.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Orangutan.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Panda.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Raccoon.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Snake.png",
+        "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Tiger%20Face.png",
+
+
+    ];
+
+    const energyRewards = { 1: { icon: "⚡️", val: 1 }, 2: { icon: "⭐️", val: 5 }, 3: { icon: "🌟", val: 10 }, 4: { icon: "✨", val: 50 } };
+
+    // --- ÉTAT DU JEU ---
+    let gameState = {
+        energy: 50, coins: 0, unlockedWorlds: [0], currentWorld: 0, lastSaveTime: Date.now(),
+        totems: [false, false, false, false], // État des 4 premiers totems
+        worldsData: worldConfigs.reduce((acc, w) => { acc[w.id] = { grid: Array(16).fill(null), orders: [] }; return acc; }, {})
+    };
+
+    let selectedIdx = null;
+
+    // --- LOGIQUE SAUVEGARDE & TEMPS ---
+    function saveGame() {
+        gameState.lastSaveTime = Date.now();
+        localStorage.setItem('louna_town_pro_v2', JSON.stringify(gameState));
+    }
+
+    function loadGame() {
+        const saved = localStorage.getItem('louna_town_pro_v2');
+        if (saved) {
+            gameState = JSON.parse(saved);
+            const now = Date.now();
+            const diffHours = Math.floor((now - gameState.lastSaveTime) / 3600000);
+            if (diffHours > 0) {
+                gameState.energy += diffHours * 50;
+                showMsg(`Bon retour ! +${diffHours * 50} ⚡`);
+            }
+        }
+        initGridDisplay();
+        updateUI();
+        setupCreaMenu();
+        setInterval(tick, 1000);
+    }
+
+    function tick() {
+        const now = Date.now();
+        const world = gameState.worldsData[gameState.currentWorld];
+        let changed = false;
+
+        // Expiration missions
+        for (let i = world.orders.length - 1; i >= 0; i--) {
+            if (world.orders[i].expiresAt && now > world.orders[i].expiresAt) {
+                world.orders.splice(i, 1);
+                showMsg("Client parti... 🏃‍♂️");
+                setTimeout(() => { createOrder(gameState.currentWorld); updateUI(); }, 5000);
+                changed = true;
+            }
+        }
+
+        // Timer Heure France
+        const d = new Date();
+        const m = 59 - d.getMinutes(), s = 59 - d.getSeconds();
+        document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        if (m === 0 && s === 0) { gameState.energy += 50; showMsg("+50 ⚡ !"); changed = true; }
+
+        updateUI();
+    }
+
+    // --- JEU ---
+    function initGridDisplay() {
+        const grid = document.getElementById('grid'); grid.innerHTML = '';
+        for (let i = 0; i < 16; i++) {
+            const cell = document.createElement('div'); cell.className = 'cell'; cell.id = `cell-${i}`;
+            cell.onclick = () => handleCellClick(i); grid.appendChild(cell);
+        }
+    }
+
+    function handleCellClick(idx) {
+        const world = gameState.worldsData[gameState.currentWorld];
+        const clicked = world.grid[idx];
+
+        if (selectedIdx === null) {
+            if (clicked) selectedIdx = idx;
+        } else {
+            const selected = world.grid[selectedIdx];
+            if (selectedIdx === idx) {
+                if (clicked && clicked.type === 'energy') {
+                    gameState.energy += energyRewards[clicked.lvl].val;
+                    world.grid[idx] = null;
+                }
+                selectedIdx = null;
+            } else if (clicked && selected && clicked.type === selected.type && clicked.lvl === selected.lvl && clicked.lvl < 8) {
+                // FUSION
+                world.grid[idx].lvl++;
+                world.grid[selectedIdx] = null;
+                selectedIdx = null;
+                showMsg("Fusion ! ✨");
+                
+                // TOTEM CHECK
+                if (world.grid[idx].lvl === 8 && gameState.currentWorld < 4) {
+                    gameState.totems[gameState.currentWorld] = true;
+                    showMsg(`TOTEM OBTENU ! ${worldConfigs[gameState.currentWorld].totem}`);
+                }
+            } else if (!clicked) {
+                world.grid[idx] = selected; world.grid[selectedIdx] = null; selectedIdx = null;
+            } else selectedIdx = idx;
+        }
+        updateUI();
+    }
+
+    function generateItem() {
+        if (gameState.energy <= 0) return showMsg("Dors un peu... 😴");
+        const world = gameState.worldsData[gameState.currentWorld];
+        const empty = world.grid.map((v, i) => v === null ? i : null).filter(v => v !== null);
+        if (empty.length === 0) return showMsg("Plateau plein !");
+        world.grid[empty[Math.floor(Math.random()*empty.length)]] = { type: 'normal', lvl: 1 };
+        gameState.energy--;
+        updateUI();
+    }
+
+function createOrder(wId) {
+    const world = gameState.worldsData[wId];
+    
+    if (world.orders.length < 3) {
+        // 1. Lister les images de personnages déjà utilisées dans les missions actuelles
+        const usedImages = world.orders.map(order => order.img);
+        
+        // 2. Filtrer la liste globale pour ne garder que les personnages disponibles
+        const availableCharacters = characters3D.filter(char => !usedImages.includes(char));
+        
+        // 3. Sécurité : Si tous les personnages sont pris (rare), on reprend la liste complète
+        const pool = availableCharacters.length > 0 ? availableCharacters : characters3D;
+        
+        // 4. Choisir un personnage au hasard dans la liste des disponibles
+        const chosenChar = pool[Math.floor(Math.random() * pool.length)];
+        
+        const lvl = Math.floor(Math.random() * 4) + 2;
+        world.orders.push({
+            img: chosenChar, // Personnage unique !
+            level: lvl, 
+            reward: lvl * 25,
+            expiresAt: Date.now() + (Math.random() * 120000 + 60000)
+        });
+    }
+}
+
+    function completeOrder(idx) {
+        const world = gameState.worldsData[gameState.currentWorld];
+        const order = world.orders[idx];
+        const itemIdx = world.grid.findIndex(it => it && it.type === 'normal' && it.lvl === order.level);
+        if (itemIdx !== -1) {
+            world.grid[itemIdx] = null;
+            gameState.coins += order.reward;
+            world.orders.splice(idx, 1);
+            showMsg("Merci ! 💰");
+            // Récompense énergie
+            if (Math.random() > 0.4) {
+                const empty = world.grid.map((v, i) => v === null ? i : null).filter(v => v !== null);
+                if (empty.length > 0) world.grid[empty[0]] = { type: 'energy', lvl: 1 };
+            }
+            setTimeout(() => { createOrder(gameState.currentWorld); updateUI(); }, 3000);
+            updateUI();
+        }
+    }
+
+    // --- UI ---
+    function updateUI() {
+        const config = worldConfigs[gameState.currentWorld];
+        const data = gameState.worldsData[gameState.currentWorld];
+        
+        document.getElementById('energy').innerText = gameState.energy;
+        document.getElementById('coins').innerText = gameState.coins;
+        document.body.style.background = config.color;
+
+        // Grille stable
+        data.grid.forEach((item, i) => {
+            const cell = document.getElementById(`cell-${i}`);
+            const icon = item ? (item.type === 'energy' ? energyRewards[item.lvl].icon : config.items[item.lvl]) : '';
+            const html = item ? `<div class="item">${icon}<span class="level-badge">Lvl ${item.lvl}</span></div>` : '';
+            if (cell.innerHTML !== html) cell.innerHTML = html;
+            cell.classList.toggle('selected', i === selectedIdx);
+        });
+
+        // Missions 3D
+        const ordersEl = document.getElementById('orders-list');
+        ordersEl.innerHTML = '';
+        if (data.orders.length === 0) createOrder(gameState.currentWorld);
+        data.orders.forEach((order, idx) => {
+            const ready = data.grid.some(it => it && it.type === 'normal' && it.lvl === order.level);
+            const time = Math.max(0, Math.floor((order.expiresAt - Date.now()) / 1000));
+            const card = document.createElement('div');
+            card.className = `order-card ${ready?'ready':''}`;
+            card.innerHTML = `
+                <img src="${order.img}" class="char-3d">
+                <div class="order-item">${config.items[order.level]}</div>
+                <div class="order-timer" style="${time <= 10 ? 'color:red; animation:blink 0.5s infinite' : ''}">
+                    ⏱️ ${Math.floor(time/60)}:${(time%60).toString().padStart(2,'0')}
+                </div>
+            `;
+            if (ready) card.onclick = () => completeOrder(idx);
+            ordersEl.appendChild(card);
+        });
+
+        // Totems Bar
+        const totemBar = document.getElementById('totem-bar');
+        totemBar.innerHTML = '';
+        for(let i=0; i<4; i++) {
+            const slot = document.createElement('div');
+            slot.className = `totem-slot ${gameState.totems[i] ? 'active' : ''}`;
+            slot.innerHTML = worldConfigs[i].totem;
+            totemBar.appendChild(slot);
+        }
+
+        // Worlds Menu
+        const menu = document.getElementById('worlds-menu'); menu.innerHTML = '';
+        worldConfigs.forEach(w => {
+            const unlocked = gameState.unlockedWorlds.includes(w.id);
+            const canUnlock = (w.id === 4) ? (gameState.totems.every(t => t === true)) : (gameState.coins >= w.price);
+            const btn = document.createElement('div');
+            btn.className = `world-btn ${unlocked ? 'unlocked' : ''} ${gameState.currentWorld === w.id ? 'active' : ''}`;
+            btn.innerHTML = (w.id === 4 && !unlocked) ? "🏛️🔒" : w.icon;
+            btn.onclick = () => {
+                if (unlocked) { gameState.currentWorld = w.id; updateUI(); }
+                else if (w.id === 4) { if (gameState.totems.every(t => t === true)) unlockWorld(w); else showMsg("Il te faut les 4 totems !"); }
+                else if (gameState.coins >= w.price) unlockWorld(w);
+                else showMsg(`Il te manque ${w.price - gameState.coins} 💰`);
+            };
+            menu.appendChild(btn);
+        });
+        saveGame();
+    }
+
+    function unlockWorld(w) {
+        if (w.price !== "TOTEMS") gameState.coins -= w.price;
+        gameState.unlockedWorlds.push(w.id);
+        gameState.currentWorld = w.id;
+        updateUI();
+    }
+
+    function resetMissions() { if (gameState.coins >= 50) { gameState.coins -= 50; gameState.worldsData[gameState.currentWorld].orders = []; for(let i=0; i<3; i++) createOrder(gameState.currentWorld); updateUI(); } else showMsg("Pas assez de pièces !"); }
+    function resetFullGame() { if (confirm("Tout supprimer ?")) { localStorage.clear(); window.location.reload(); } }
+    function addCheatCash() { gameState.coins += 50; updateUI(); }
+    function addCheatEnergy() { gameState.energy += 50; updateUI(); }
+    function showMsg(t) { const m = document.getElementById('msg'); m.innerText = t; setTimeout(() => m.innerText = "", 2500); }
+
+    window.onload = loadGame;
+
+    let currentPreviewIndex = 0;
+
+// 1. Initialisation au chargement
+function setupCreaMenu() {
+    if (gameState.myAvatar) {
+        const savedIndex = characters3D.indexOf(gameState.myAvatar);
+        if (savedIndex !== -1) currentPreviewIndex = savedIndex;
+    } else {
+        // Par défaut, prend le premier personnage de la liste
+        gameState.myAvatar = characters3D[0];
+    }
+    updatePreview();
+    updateAvatarDisplay();
+}
+
+// 2. Navigation dans le carrousel
+function changeAvatarSelection(direction) {
+    currentPreviewIndex += direction;
+
+    if (currentPreviewIndex >= characters3D.length) currentPreviewIndex = 0;
+    if (currentPreviewIndex < 0) currentPreviewIndex = characters3D.length - 1;
+
+    gameState.myAvatar = characters3D[currentPreviewIndex];
+    updatePreview();
+    updateAvatarDisplay();
+    saveGame(); // Sauvegarde immédiate du choix
+}
+
+// 3. Mise à jour visuelle du menu
+function updatePreview() {
+    const previewImg = document.getElementById('avatar-preview');
+    if (previewImg) {
+        previewImg.src = characters3D[currentPreviewIndex];
+        // Effet d'animation lors du changement
+        previewImg.style.transform = "scale(0.5)";
+        setTimeout(() => { previewImg.style.transform = "scale(1)"; }, 10);
+    }
+}
+
+// 4. Mise à jour de l'avatar sur l'écran de jeu
+function updateAvatarDisplay() {
+    const mainImg = document.getElementById('current-avatar-img');
+    const display = document.getElementById('my-avatar-display');
+    if (gameState.myAvatar && mainImg) {
+        mainImg.src = gameState.myAvatar;
+        display.style.display = "flex";
+    }
+}
+
+// 5. Ouverture / Fermeture du menu
+function toggleCreaMenu() {
+    const menu = document.getElementById('crea-menu');
+    if (menu.style.display === 'none' || menu.style.display === '') {
+        menu.style.display = 'flex';
+        updatePreview(); // Rafraîchit l'image à l'ouverture
+    } else {
+        menu.style.display = 'none';
+        showMsg("Profil enregistré ! ✨");
+    }
+}
+
+// Initialiser les données de la ville dans gameState si elles n'existent pas
+if (!gameState.townItems) gameState.townItems = [];
+
+function toggleTownMenu() {
+    const ui = document.getElementById('town-ui');
+    if (ui.style.display === 'none' || ui.style.display === '') {
+        ui.style.display = 'flex';
+        // Mise à jour immédiate des pièces depuis le gameState
+        const townCoinDisplay = document.getElementById('town-coins');
+        if (townCoinDisplay) townCoinDisplay.innerText = gameState.coins;
+        renderTown();
+    } else {
+        ui.style.display = 'none';
+        updateUI(); // Rafraîchit l'UI principale en sortant
+    }
+}
+
+let draggingItem = null;
+let offset = { x: 0, y: 0 };
+
+function renderTown() {
+    const landscape = document.getElementById('town-landscape');
+    if (!landscape) return;
+    
+    landscape.innerHTML = '';
+    gameState.townItems.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'placed-item';
+        div.innerText = item.emoji;
+        div.style.left = item.x + "px";
+        div.style.top = item.y + "px";
+
+        const startDrag = (e) => {
+            // BLOQUE LE BLEU IMMEDIATEMENT
+            if (e.cancelable) e.preventDefault();
+            
+            draggingItem = { data: item, element: div, index: index };
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            const rect = div.getBoundingClientRect();
+            offset.x = clientX - rect.left;
+            offset.y = clientY - rect.top;
+            
+            div.style.zIndex = "2000";
+        };
+
+        div.addEventListener('mousedown', startDrag);
+        div.addEventListener('touchstart', startDrag, { passive: false });
+        landscape.appendChild(div);
+    });
+}
+
+function buyBuilding(type, price, emoji) {
+    if (gameState.coins >= price) {
+        gameState.coins -= price; // Retire l'argent global
+        
+        const newItem = {
+            type: type,
+            emoji: emoji,
+            x: 50, // Position par défaut
+            y: 50
+        };
+        
+        gameState.townItems.push(newItem);
+        
+        // Mise à jour des deux affichages (Ville + Jeu)
+        document.getElementById('town-coins').innerText = gameState.coins;
+        document.getElementById('coins').innerText = gameState.coins; 
+        
+        saveGame();
+        renderTown();
+        showMsg("C'est construit ! 🏗️");
+    } else {
+        showMsg("Il te manque " + (price - gameState.coins) + " 💰 !");
+    }
+}
+
+
+function showMsg(t) {
+    const m = document.getElementById('msg');
+    if (!m) return;
+    
+    m.innerText = t;
+    m.style.display = "block"; // S'assure qu'il est visible
+    
+    // On efface le message après 2.5 secondes
+    setTimeout(() => {
+        m.innerText = "";
+    }, 2500);
+}
+
+
+// Gestion globale sur Window pour plus de fluidité
+window.addEventListener('mousemove', (e) => {
+    if (!draggingItem) return;
+    e.preventDefault(); // Bloque encore une fois la sélection
+
+    const landscape = document.getElementById('town-landscape');
+    const rect = landscape.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    let x = clientX - rect.left - offset.x;
+    let y = clientY - rect.top - offset.y;
+
+    // Garder l'objet dans les limites
+    x = Math.max(0, Math.min(x, rect.width - 60));
+    y = Math.max(0, Math.min(y, rect.height - 60));
+
+    draggingItem.element.style.left = x + "px";
+    draggingItem.element.style.top = y + "px";
+    draggingItem.data.x = x;
+    draggingItem.data.y = y;
+});
+
+window.addEventListener('mouseup', () => {
+    if (draggingItem) {
+        draggingItem.element.style.zIndex = "1";
+        draggingItem = null;
+        saveGame();
+    }
+});
+window.addEventListener('touchend', () => {
+    if (draggingItem) {
+        draggingItem = null;
+        saveGame();
+    }
+});
+
+// Écouteurs globaux sur la fenêtre pour ne pas perdre l'objet si on bouge trop vite
+window.addEventListener('mousemove', handleMove);
+window.addEventListener('mouseup', endDrag);
+window.addEventListener('touchmove', handleMove, { passive: false });
+window.addEventListener('touchend', endDrag);
+
+    function resetFullGame() {
+    // 1. Première demande de confirmation
+    if (confirm("Louna, veux-tu vraiment supprimer TOUTE ta progression (pièces, mondes, totems) ?")) {
+        
+        // 2. Deuxième confirmation de sécurité pour éviter les erreurs
+        if (confirm("Es-tu absolument certaine ? Cette action est irréversible !")) {
+            
+            // 3. Vide la mémoire locale du navigateur
+            localStorage.clear();
+            
+            // 4. Facultatif : On peut aussi vider manuellement l'objet en cours 
+            // pour être sûr que rien ne soit sauvegardé juste avant le reload
+            gameState = null; 
+
+            // 5. Affiche un petit message d'adieu (facultatif)
+            alert("Réinitialisation réussie. Le jeu va recommencer à zéro.");
+
+            // 6. Recharge la page immédiatement pour relancer le jeu neuf
+            window.location.reload();
+        }
+    }
+}
+</script>
+</body>
+</html>
