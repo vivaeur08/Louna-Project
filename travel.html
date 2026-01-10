@@ -57,9 +57,9 @@
 
 /* Ajustement de la grille pour téléphone */
 .grid {
-        grid-template-columns: repeat(4, 80px) !important;
-        grid-template-rows: repeat(4, 80px) !important;
-        gap: 12px !important;
+        grid-template-columns: repeat(4, 74px) !important;
+        grid-template-rows: repeat(4, 74px) !important;
+        gap: 10px !important;
 }
 
 
@@ -99,14 +99,14 @@
             background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
             height: 100vh; display: flex; flex-direction: column; align-items: center;
             overflow: hidden; transition: 0.5s;
-            zoom: 1.15;
+            zoom: 1.08;
             -moz-transform: scale(1.15); /* Pour la compatibilité */
             -webkit-transform-origin: top center;
         }
 
         /* --- HEADER (STATS) --- */
         .header {
-            width: 95%; background: var(--panel-bg); backdrop-filter: blur(15px);
+            width: 90%; background: var(--panel-bg); backdrop-filter: blur(15px);
             padding: 15px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             border-radius: 0 0 30px 30px; z-index: 100;
         }
@@ -137,9 +137,9 @@
         }
         .grid { display: grid; grid-template-columns: repeat(4, 72px); grid-template-rows: repeat(4, 72px); gap: 10px; }
         .cell {
-            width: 80px; height: 80px; background: rgba(255,255,255,0.6);
+            width: 74px; height: 74px; background: rgba(255,255,255,0.6);
             border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            font-size: 2.8rem; cursor: pointer; position: relative;
+            font-size: 2.4rem; cursor: pointer; position: relative;
             box-shadow: 0 4px 0 rgba(0,0,0,0.1); transition: 0.2s;
         }
         .cell.selected { border: 4px solid var(--accent); background: white; transform: translateY(-5px); box-shadow: 0 8px 20px var(--accent); }
@@ -1040,6 +1040,7 @@ document.getElementById('grid').addEventListener('click', (e) => {
 </script>
 </body>
 </html>
+
 
 
 
