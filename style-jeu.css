@@ -83,6 +83,8 @@ input[type="text"] {
     #game-container-wrapper { flex-direction: column; gap: 10px; }
     .shop { flex-direction: row; display: flex; width: 90%; justify-content: space-around; padding: 5px; }
     .grid div { font-size: 1.5rem; }
+    .shop-item p { font-size: 0.7rem; margin: 2px 0; }
+    .btn-shop { padding: 5px; font-size: 0.7rem; }
 }
 
 /* --- CORRECTIF ANTI-CASSE IPHONE --- */
@@ -123,3 +125,4 @@ input[type="text"] {
     max-height: 380px;
     margin: 0 auto;
 }
+
