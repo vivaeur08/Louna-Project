@@ -305,3 +305,16 @@ document.getElementById('hard-reset-btn').addEventListener('click', () => {
     }
 });
 
+
+// --- BOUTON TRICHE / TEST ---
+document.getElementById('cheat-btn').addEventListener('click', () => {
+    if (confirm("Activer le boost (Niv. 76 + 1700 pièces) ?")) {
+        level = 76;
+        coins = 1700;
+        saveData();    // Sauvegarde dans le localStorage
+        startLevel();  // Relance le niveau avec les nouvelles stats
+        updateUI();    // Met à jour l'affichage
+    }
+});
+
+
