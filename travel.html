@@ -52,8 +52,8 @@
     z-index: 1100;
     font-size: 20px;
 }
-#btn-open-left { left: 5px; }
-#btn-open-right { right: 5px;top: 70%; }
+#btn-open-left { left: 5px; top: 90%;}
+#btn-open-right { right: 5px;top: 90%; }
 
 /* Ajustement de la grille pour téléphone */
 .grid {
@@ -350,7 +350,20 @@ body.menu-open #overlay-closer {
     </div>
 </div>
 
-<div id="my-avatar-display" style="position: fixed; bottom: 95px; left: calc(50% - 130px); width: 75px; height: 75px; background: white; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: none; align-items: center; justify-content: center; z-index: 900; overflow: hidden;">
+<div id="my-avatar-display" style="position: fixed; 
+    bottom: 95px; 
+    left: calc(50% - 130px); /* Ajusté pour rester à gauche des totems */
+    width: 55px !important;  /* Plus petit */
+    height: 55px !important; /* Plus petit */
+    background: white; 
+    border-radius: 50%; 
+    border: 3px solid white; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+    display: none; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 900; 
+    overflow: hidden;">
     <img id="current-avatar-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
 </div>
 
@@ -1026,6 +1039,7 @@ document.getElementById('grid').addEventListener('click', (e) => {
 </script>
 </body>
 </html>
+
 
 
 
