@@ -2,7 +2,6 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Louna Town - Professionnel</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
@@ -142,10 +141,23 @@
         .cell.selected { border: 4px solid var(--accent); background: white; transform: translateY(-5px); box-shadow: 0 8px 20px var(--accent); }
 
         /* --- BARRE DE TOTEMS VERTICALE --- */
-        .totem-bar {
-            display: flex; flex-direction: column; gap: 10px; padding: 15px;
-            background: var(--panel-bg); border-radius: 20px; box-shadow: var(--shadow);
-        }
+        #totem-bar {
+    position: fixed;
+    /* On le place en bas */
+    bottom: 110px; /* Ajuste cette valeur selon la hauteur de tes boutons cadeaux/poubelle */
+    left: 50%;
+    transform: translateX(-50%); /* Pour le centrer parfaitement */
+    
+    display: flex;
+    flex-direction: row; /* Aligne les totems à l'horizontale */
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 10px 20px;
+    border-radius: 25px;
+    z-index: 1200;
+    pointer-events: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
         .totem-slot {
             width: 45px; height: 45px; background: #eee; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
@@ -254,17 +266,19 @@ body.menu-open #overlay-closer {
 /* Totems toujours visibles (on les sort du menu) */
 #totem-bar {
     position: fixed;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
+    bottom: 20px; /* Place la barre à 20px du bas de l'écran */
+    left: 50%;
+    transform: translateX(-50%); /* Centre la barre parfaitement au milieu */
+    
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background: rgba(255, 255, 255, 0.6);
-    padding: 10px;
-    border-radius: 20px;
-    z-index: 1200; /* Toujours au-dessus */
-    pointer-events: none; /* Ne gêne pas le clic */
+    flex-direction: row; /* Aligne les icônes horizontalement */
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 10px 20px;
+    border-radius: 30px;
+    z-index: 1200;
+    pointer-events: auto; /* Permet de cliquer si besoin */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
 .totem-slot { font-size: 1.5rem; filter: grayscale(1); opacity: 0.3; }
@@ -287,6 +301,7 @@ body.menu-open #overlay-closer {
     <div id="menu-right" class="side-menu">
         <button class="btn-round" onclick="toggleTownMenu()">🏡</button>
         <button class="btn-round" onclick="toggleCreaMenu()">👤</button>
+        <button class="btn-round" onclick="goHome()">✨​</button>
         </div>
     
 <div class="header">
@@ -307,7 +322,6 @@ body.menu-open #overlay-closer {
         <div class="grid" id="grid"></div>
     </div>
 
-    <div class="totem-bar" id="totem-bar"></div>
 </div>
 
 <div class="actions">
@@ -315,7 +329,7 @@ body.menu-open #overlay-closer {
     <button class="btn-round" style="background: #333;" onclick="resetFullGame()">🗑️</button>
 </div>
 
-<button class="btn-round" style="position: fixed; top: 15px; right: 15px; width: 55px; height: 55px; z-index: 999; background: white; border: 3px solid #ff6b6b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onclick="toggleCreaMenu()">👤</button>
+<div id="totem-bar"></div>
 
 <div id="crea-menu" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
     <div style="background: white; padding: 25px; border-radius: 30px; text-align: center; width: 300px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; border: 4px solid #fff;">
@@ -335,11 +349,10 @@ body.menu-open #overlay-closer {
     </div>
 </div>
 
-<div id="my-avatar-display" style="position: fixed; right: 15px; top: 180px; width: 75px; height: 75px; background: white; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: none; align-items: center; justify-content: center; z-index: 900; overflow: hidden;">
+<div id="my-avatar-display" style="position: fixed; bottom: 95px; left: calc(50% - 130px); width: 75px; height: 75px; background: white; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: none; align-items: center; justify-content: center; z-index: 900; overflow: hidden;">
     <img id="current-avatar-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
 </div>
 
-<button id="town-btn" class="btn-round" style="position: fixed; right: 15px; top: 270px; width: 60px; height: 60px; z-index: 999; background: #4caf50; border: 3px solid white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onclick="toggleTownMenu()">🏡</button>
 
 <div id="town-ui" style="display:none; position: fixed; inset: 0; background: linear-gradient(to bottom, #87CEEB, #E0F7FA); z-index: 3000; flex-direction: column; align-items: center; overflow-y: auto; padding: 20px;">
     
@@ -363,7 +376,7 @@ body.menu-open #overlay-closer {
     </div>
 </div>
 
-<button class="btn-round" style="position: fixed; top: 15px; left: 15px; width: 55px; height: 55px; z-index: 999; background: white; border: 3px solid #4facfe; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);" onclick="goHome()">🏠</button>
+<
 
 <script>
 function goHome() {
@@ -980,7 +993,7 @@ function updateTotemsUI() {
         if(slots[i]) slots[i].classList.toggle('active', unlocked);
     });
 }
-    
+
 function adjustLayout() {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -998,7 +1011,6 @@ function adjustLayout() {
 
 window.addEventListener('resize', adjustLayout);
 window.addEventListener('load', adjustLayout);
-
 function toggleMenu(id) {
     const menu = document.getElementById(id);
     const isOpen = menu.classList.contains('open');
@@ -1024,9 +1036,11 @@ document.getElementById('grid').addEventListener('click', (e) => {
         e.stopPropagation(); // Empêche de cliquer sur une cellule par erreur
     }
 });
+
 </script>
 </body>
 </html>
+
 
 
 
